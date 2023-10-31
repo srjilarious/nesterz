@@ -1,0 +1,3 @@
+test "Hi" {
+    // nothing here!
+}

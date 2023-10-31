@@ -498,3 +498,16 @@ pub const Cpu6502State = enum {
     Normal,
     Halted,
 };
+
+
+
+test "sanity checks" {
+    try std.testing.expect(isStore(CpuOp.STA));
+    try std.testing.expect(!isStore(CpuOp.LDA));
+
+    try std.testing.expectEqual(
+        Instruction6502.fromOpCodeAsResult(0x69), 
+        Instruction6502.init(0x69, CpuOp.ADC, AddressMode.Immediate, 2, 2)
+    );
+}
+

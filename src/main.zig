@@ -1,5 +1,6 @@
 const std = @import("std");
-const nes = @import("nesterz/emu.zig");
+const nes = @import("nesterz/nesterz.zig");
+const emu = nes.emu;
 
 pub fn main() !void {
     // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
@@ -15,11 +16,4 @@ pub fn main() !void {
     try stdout.print("Run `zig build test` to run the tests.\n", .{});
 
     try bw.flush(); // don't forget to flush!
-}
-
-test "sanity checks" {
-    try std.testing.expect(nes.isStore(nes.CpuOp.STA));
-    try std.testing.expect(!nes.isStore(nes.CpuOp.LDA));
-
-    try std.testing.expectEqual(nes.Instruction6502.fromOpCodeAsResult(0x69), nes.Instruction6502.init(0x69, nes.CpuOp.ADC, nes.AddressMode.Immediate, 2, 2));
 }
