@@ -63,24 +63,19 @@ pub fn build(b: *std.Build) void {
     // const run_unit_tests = b.addRunArtifact(unit_tests);
 
     const test_step = b.step("test", "Run unit tests");
-    addUnitTest(b, test_step, "src/nesterz/nesterz.zig", target, optimize);
-    addUnitTest(b, test_step, "src/nesterz/tests/math_tests.zig", target, optimize);
-    addUnitTest(b, test_step, "src/nesterz/cpu.zig", target, optimize);
-
-    // Similar to creating the run step earlier, this exposes a `test` step to
-    // the `zig build --help` menu, providing a way for the user to request
-    // running the unit tests.
-}
-
-fn addUnitTest(b: *std.Build, testStep: *std.build.Step, file: []const u8, target: std.zig.CrossTarget, optimize: std.builtin.OptimizeMode) void {
     // Creates a step for unit testing. This only builds the test executable
     // but does not run it.
     const unit_tests = b.addTest(.{
-        .root_source_file = .{ .path = file },
+        .root_source_file = .{ .path = "src/nesterz/tests/main.zig" },
         .target = target,
         .optimize = optimize,
     });
 
+    unit_tests.addModule("nesterz", exe);
     const run_unit_tests = b.addRunArtifact(unit_tests);
-    testStep.dependOn(&run_unit_tests.step);
+    test_step.dependOn(&run_unit_tests.step);
+
+    // Similar to creating the run step earlier, this exposes a `test` step to
+    // the `zig build --help` menu, providing a way for the user to request
+    // running the unit tests.
 }

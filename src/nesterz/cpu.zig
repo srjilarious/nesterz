@@ -169,8 +169,46 @@ pub const Cpu6502 = struct {
             },
         }
     }
+
+    fn isOnExecCycle(self: *Cpu6502) bool {
+        if(emu.isStore(self.currInst.op)) {
+            return self.currCycle == self.currInst.numCycles - 2;
+        }
+
+        return switch(self.currInst.mode) {
+            AddressMode.Accumulator => self.currCycle == 0,
+            AddressMode.Implied => {
+                switch(self.currInst.op) {
+                    CpuOp.RTS or CpuOp.RTI or CpuOp.BRK => self.currCycle >= 1,
+                    // CpuOp.RTI=> self.currCycle >= 1,
+                    // CpuOp.BRK => self.currCycle >= 1,
+                    else => self.currCycle == 1,
+                }
+            },
+            AddressMode.Immediate => self.currCycle == 1,
+            AddressMode.ZeroPage => self.currCycle == 2,
+            AddressMode.ZeroPageX or AddressMode.ZeroPageY => self.currCycle == 3,
+            AddressMode.Relative => self.currCycle == 1,
+            AddressMode.Absolute => {
+                switch(self.currInst.op) {
+                    CpuOp.JMP or CpuOp.JSR  => self.currCycle == 2, 
+                    // CpuOp.JSR => self.currCycle == 2,
+                    else => self.currCycle == 3,
+                }
+            },
+            AddressMode.AbsoluteX or AddressMode.AbsoluteY => self.currCycle == 3,
+            AddressMode.InidrectX or AddressMode.InidrectY => self.currCycle == 4,
+            AddressMode.Indirect => self.currCycle == 4,
+            else => @panic("Unknown address mode"),
+        };
+    }
+
+    // fn handleInstExec(self: *Cpu6502) void {
+    //
+    // }
 };
 
 test "CPU test" {
     std.debug.print("Yay!\n", .{});
 }
+
