@@ -202,7 +202,7 @@ pub const Instruction6502 = struct {
         return .{ .opCode = opCode, .op = op, .mode = mode, .numBytes = nb, .numCycles = nc };
     }
 
-    pub fn fromOpCodeAsResult(opCode: u8) EmuError!Instruction6502 {
+    pub fn fromOpCode(opCode: u8) EmuError!Instruction6502 {
         return switch (opCode) {
             // ADC - Add with Carry
             0x69 => Instruction6502.init(opCode, CpuOp.ADC, AddressMode.Immediate, 2, 2),
@@ -506,7 +506,7 @@ test "sanity checks" {
     try std.testing.expect(!isStore(CpuOp.LDA));
 
     try std.testing.expectEqual(
-        Instruction6502.fromOpCodeAsResult(0x69), 
+        Instruction6502.fromOpCode(0x69), 
         Instruction6502.init(0x69, CpuOp.ADC, AddressMode.Immediate, 2, 2)
     );
 }

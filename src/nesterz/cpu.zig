@@ -77,13 +77,13 @@ pub const Cpu6502 = struct {
         self.shouldFetch = true;
         switch(self.procState) {
             CpuState.Startup => {
-                if(self.cpuCycle == 0) {
+                if(self.currCycle == 0) {
                     self.pc = 0xfffe;
                 }
-                else if(self.cpuCycle == 1) {
+                else if(self.currCycle == 1) {
                     self.internalAddr = @as(u16, self.dataBus);
                 }
-                else if(self.cpuCycle == 2) {
+                else if(self.currCycle == 2) {
                     self.internalAddr |= @as(u16, self.dataBus) << 8;
                     self.pc = self.internalAddr;
                     self.procState = CpuState.Normal;
@@ -93,9 +93,9 @@ pub const Cpu6502 = struct {
                 }
             },
             CpuState.Normal => {
-                if(self.cpuCycle == 0) {
+                if(self.currCycle == 0) {
                     self.currInst = try Instruction.fromOpCode(self.dataBus);
-                    self.cyckesKeft - self.currInst.numCycles;
+                    self.cyclesLeft = self.currInst.numCycles;
                 }
 
                 self.shouldFetch = true;
@@ -142,7 +142,7 @@ pub const Cpu6502 = struct {
                     self.workingVal = @as(u16, self.a);
                     self.shouldFetch = false;
                 } else if(self.currCycle == 1) {
-                    self.a = @as(u8, self.workingVal);
+                    self.a = @truncate(self.workingVal);
                 }
                 else {
                     @panic("Unexpected cycle!");
@@ -188,38 +188,40 @@ pub const Cpu6502 = struct {
         return switch(self.currInst.mode) {
             AddressMode.Accumulator => self.currCycle == 0,
             AddressMode.Implied => {
-                switch(self.currInst.op) {
-                    CpuOp.RTS or CpuOp.RTI or CpuOp.BRK => self.currCycle >= 1,
+                return switch(self.currInst.op) {
+                    CpuOp.RTS, CpuOp.RTI, CpuOp.BRK => self.currCycle >= 1,
                     // CpuOp.RTI=> self.currCycle >= 1,
                     // CpuOp.BRK => self.currCycle >= 1,
                     else => self.currCycle == 1,
-                }
+                };
             },
             AddressMode.Immediate => self.currCycle == 1,
             AddressMode.ZeroPage => self.currCycle == 2,
-            AddressMode.ZeroPageX or AddressMode.ZeroPageY => self.currCycle == 3,
+            AddressMode.ZeroPageX, AddressMode.ZeroPageY => self.currCycle == 3,
             AddressMode.Relative => self.currCycle == 1,
             AddressMode.Absolute => {
-                switch(self.currInst.op) {
-                    CpuOp.JMP or CpuOp.JSR  => self.currCycle == 2, 
+                return switch(self.currInst.op) {
+                    CpuOp.JMP, CpuOp.JSR  => self.currCycle == 2, 
                     // CpuOp.JSR => self.currCycle == 2,
                     else => self.currCycle == 3,
-                }
+                };
             },
-            AddressMode.AbsoluteX or AddressMode.AbsoluteY => self.currCycle == 3,
-            AddressMode.InidrectX or AddressMode.InidrectY => self.currCycle == 4,
+            AddressMode.AbsoluteX, AddressMode.AbsoluteY => self.currCycle == 3,
+            AddressMode.IndirectX, AddressMode.IndirectY => self.currCycle == 4,
             AddressMode.Indirect => self.currCycle == 4,
-            else => @panic("Unknown address mode"),
         };
     }
 
     fn handleInstExec(self: *Cpu6502) void {
         switch(self.currInst.op) {
             CpuOp.AND => {
-                self.a = self.a & @as(u8, self.workingVal);
+                self.a = self.a & @as(u8, @truncate(self.workingVal));
                 // self.checkZeroFlag(self.a);
                 // self.checkNegativeFlag(self.a);
             },
+            else => {
+                @panic("Unhandled instruction!");
+            }
         }
     }
 };
