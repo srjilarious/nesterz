@@ -14,5 +14,3 @@ pub const Cpu6502 = cpu.Cpu6502;
 test "Top level test" {
     std.debug.print("Yay!\n", .{});
 }
-
-pub const math_test = @import("tests/math_tests.zig");

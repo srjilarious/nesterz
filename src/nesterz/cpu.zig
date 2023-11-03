@@ -58,7 +58,7 @@ pub const Cpu6502 = struct {
             .dataBus = 0,
             .internalAddr = 0,
             .workingVal = 0,
-            .shouldFetch = 0,
+            .shouldFetch = false,
             .busState = ReadWriteState.HighImpedance,
             .procState = CpuState.Startup,
             .currInst = .{
@@ -138,32 +138,42 @@ pub const Cpu6502 = struct {
     fn handleAdressMode(self: *Cpu6502) void {
         switch(self.currInst.mode) {
             AddressMode.Accumulator => {
-                
+                if(self.currCycle == 0) {
+                    self.workingVal = @as(u16, self.a);
+                    self.shouldFetch = false;
+                } else if(self.currCycle == 1) {
+                    self.a = @as(u8, self.workingVal);
+                }
+                else {
+                    @panic("Unexpected cycle!");
+                }
             },
             AddressMode.Implied => {
-                
+                if(self.currCycle < self.currInst.numCycles - 1) {
+                    self.shouldFetch = false;
+                }
             },
             AddressMode.Immediate => {
-                
+                self.workingVal = @as(u16, self.dataBus);
             },
-            AddressMode.ZeroPage => {
-                
-            },
-            AddressMode.ZeroPageX or AddressMode.ZeroPageY => {
-                
-            },
-            AddressMode.Absolute => {
-                
-            },
-            AddressMode.AbsoluteX or AddressMode.AbsoluteY => {
-                
-            },
-            AddressMode.Relative => {
-                
-            },
-            AddressMode.Indirect => {
-                
-            },
+            // AddressMode.ZeroPage => {
+            //     
+            // },
+            // AddressMode.ZeroPageX or AddressMode.ZeroPageY => {
+            //     
+            // },
+            // AddressMode.Absolute => {
+            //     
+            // },
+            // AddressMode.AbsoluteX or AddressMode.AbsoluteY => {
+            //     
+            // },
+            // AddressMode.Relative => {
+            //     
+            // },
+            // AddressMode.Indirect => {
+            //     
+            // },
             else => {
                 @panic("Unimplemented address mode!");
             },
@@ -203,12 +213,14 @@ pub const Cpu6502 = struct {
         };
     }
 
-    // fn handleInstExec(self: *Cpu6502) void {
-    //
-    // }
+    fn handleInstExec(self: *Cpu6502) void {
+        switch(self.currInst.op) {
+            CpuOp.AND => {
+                self.a = self.a & @as(u8, self.workingVal);
+                // self.checkZeroFlag(self.a);
+                // self.checkNegativeFlag(self.a);
+            },
+        }
+    }
 };
-
-test "CPU test" {
-    std.debug.print("Yay!\n", .{});
-}
 
