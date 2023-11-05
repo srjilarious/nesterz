@@ -2,12 +2,12 @@
 const std = @import("std");
 const emu = @import("./emu.zig");
 
-const CpuState = emu.Cpu6502State;
-const Instruction = emu.Instruction6502;
-const ReadWriteState = emu.ReadWriteState;
-const CpuOp = emu.CpuOp;
-const AddressMode = emu.AddressMode;
-const CpuFlags = emu.CpuFlags;
+pub const CpuState = emu.Cpu6502State;
+pub const Instruction = emu.Instruction6502;
+pub const ReadWriteState = emu.ReadWriteState;
+pub const CpuOp = emu.CpuOp;
+pub const AddressMode = emu.AddressMode;
+pub const CpuFlags = emu.CpuFlags;
 
 const StackBase: u16 = 0x100;
 
@@ -79,18 +79,20 @@ pub const Cpu6502 = struct {
             CpuState.Startup => {
                 if(self.currCycle == 0) {
                     self.pc = 0xfffe;
+                    self.currCycle += 1;
                 }
                 else if(self.currCycle == 1) {
                     self.internalAddr = @as(u16, self.dataBus);
+                    self.currCycle += 1;
                 }
                 else if(self.currCycle == 2) {
                     self.internalAddr |= @as(u16, self.dataBus) << 8;
                     self.pc = self.internalAddr;
                     self.procState = CpuState.Normal;
+                    self.currCycle = 0;
                 }
-                else {
-                    @panic("Should not be here!");
-                }
+                
+                self.fetchNext();
             },
             CpuState.Normal => {
                 if(self.currCycle == 0) {
