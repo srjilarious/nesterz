@@ -177,7 +177,7 @@ pub fn storesBackValue(op: CpuOp) bool {
         CpuOp.LSR => true,
         CpuOp.ROL => true,
         CpuOp.ROR => true,
-        _ => false,
+        else => false,
     };
 }
 

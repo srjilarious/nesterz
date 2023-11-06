@@ -158,9 +158,28 @@ pub const Cpu6502 = struct {
             AddressMode.Immediate => {
                 self.workingVal = @as(u16, self.dataBus);
             },
-            // AddressMode.ZeroPage => {
-            //     
-            // },
+            AddressMode.ZeroPage => {
+                if(self.currCycle == 1) {
+                    self.shouldFetch = false;
+                    self.internalAddr = self.dataBus;
+                    if(!emu.isStore(self.currInst.op)) {
+                        self.addrBus = @as(u16, self.dataBus);
+                        self.busState = ReadWriteState.Read;
+                    }
+                }
+                else if(self.currCycle == 2) {
+                    self.workingVal = self.dataBus;
+                    if(emu.storesBackValue(self.currInst.op)) {
+                        self.shouldFetch = false;
+                    }
+                }
+                else if(self.currCycle == 3) {
+                    self.shouldFetch = false;
+                    self.addrBus = self.internalAddr;
+                    self.dataBus = @truncate(self.workingVal);
+                    self.busState = ReadWriteState.Write;
+                }
+            },
             // AddressMode.ZeroPageX or AddressMode.ZeroPageY => {
             //     
             // },
