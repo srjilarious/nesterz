@@ -17,6 +17,26 @@ pub const AddressMode = enum {
     IndirectY 
 };
 
+pub const CpuFlags = enum(u8) {
+    Empty = 0,
+    Carry  = 0x1,
+    Zero = 0x2,
+    InterruptDisabled = 0x4,
+    DecimalMode = 0x8,
+    Break = 0x10,
+    Overflow = 0x20,
+    Negative = 0x80,
+    All = 0xff
+};
+
+
+pub const Cpu6502State = enum {
+    Startup,
+    Normal,
+    Halted,
+};
+
+
 pub const CpuOp = enum {
     UNKNOWN,
     ADC,
@@ -479,24 +499,6 @@ pub const Instruction6502 = struct {
             else => EmuError.UnknownOp, // Err(format!("Unknown op code: {}", op_code)),
         };
     }
-};
-
-pub const CpuFlags = enum(u8) {
-    Empty = 0,
-    Carry  = 0x1,
-    Zero = 0x2,
-    InterruptDisabled = 0x4,
-    DecimalMode = 0x8,
-    Break = 0x10,
-    Overflow = 0x20,
-    Negative = 0x80,
-    All = 0xff
-};
-
-pub const Cpu6502State = enum {
-    Startup,
-    Normal,
-    Halted,
 };
 
 

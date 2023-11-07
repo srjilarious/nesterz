@@ -233,12 +233,35 @@ pub const Cpu6502 = struct {
         };
     }
 
+    pub fn getFlag(self: *Cpu6502, flag: CpuFlags) bool {
+        return (@intFromEnum(self.status) & @intFromEnum(flag) != 0x0);
+    }
+
+    pub fn setFlag(self: *Cpu6502, flag: CpuFlags, val: bool) void {
+        const a : u8 = @intFromEnum(self.status);
+        const b : u8 = @intFromEnum(flag);
+        if(val) {
+            self.status = @enumFromInt(a | b);
+        }
+        else {
+            self.status = @enumFromInt(a & ~b);
+        }
+    }
+
+    fn checkZeroFlag(self: *Cpu6502, val: u8) void {
+        self.setFlag(CpuFlags.Zero, val == 0);
+    }
+
+    fn checkNegativeFlag(self: *Cpu6502, val: u8) void {
+        self.setFlag(CpuFlags.Negative, (val & 0x80) != 0);
+    }
+
     fn handleInstExec(self: *Cpu6502) void {
         switch(self.currInst.op) {
             CpuOp.AND => {
                 self.a = self.a & @as(u8, @truncate(self.workingVal));
-                // self.checkZeroFlag(self.a);
-                // self.checkNegativeFlag(self.a);
+                self.checkZeroFlag(self.a);
+                self.checkNegativeFlag(self.a);
             },
             else => {
                 @panic("Unhandled instruction!");
