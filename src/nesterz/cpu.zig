@@ -263,6 +263,12 @@ pub const Cpu6502 = struct {
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
             },
+            CpuOp.ADC => {
+                var result: u16 = @as(u16, self.a) +% self.workingVal + @intFromBool(self.getFlag(CpuFlags.Carry));
+                self.a = @truncate(result);
+                self.checkZeroFlag(self.a);
+                self.checkNegativeFlag(self.a);
+            },
             else => {
                 @panic("Unhandled instruction!");
             }
