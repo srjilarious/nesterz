@@ -258,16 +258,41 @@ pub const Cpu6502 = struct {
 
     fn handleInstExec(self: *Cpu6502) void {
         switch(self.currInst.op) {
-            CpuOp.AND => {
-                self.a = self.a & @as(u8, @truncate(self.workingVal));
-                self.checkZeroFlag(self.a);
-                self.checkNegativeFlag(self.a);
-            },
             CpuOp.ADC => {
                 var result: u16 = @as(u16, self.a) +% self.workingVal + @intFromBool(self.getFlag(CpuFlags.Carry));
                 self.a = @truncate(result);
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
+            },
+            CpuOp.AND => {
+                self.a = self.a & @as(u8, @truncate(self.workingVal));
+                self.checkZeroFlag(self.a);
+                self.checkNegativeFlag(self.a);
+            },
+            CpuOp.ASL => {
+                self.workingVal = self.workingVal << 1;
+                self.setFlag(CpuFlags.Carry, (self.workingVal & 0x100) != 0);
+                self.checkZeroFlag(@intCast(self.workingVal));
+                self.checkNegativeFlag(@intCast(self.workingVal));
+            },
+            CpuOp.LDA => {
+                self.a = self.dataBus;
+            },
+            CpuOp.LDX => {
+                self.x = self.dataBus;
+            },
+            CpuOp.LSR => {
+                self.setFlag(CpuFlags.Carry, (self.workingVal & 0x1) != 0);
+                self.workingVal = (@as(u8, @truncate(self.workingVal)) >> 1);
+                self.checkZeroFlag(@intCast(self.workingVal));
+                self.checkNegativeFlag(@intCast(self.workingVal));
+            },
+            CpuOp.LDY => {
+                self.y = self.dataBus;
+            },
+            CpuOp.NOP => {},
+            CpuOp.ORA => {
+                self.a = self.a | @as(u8, @truncate(self.workingVal));
             },
             else => {
                 @panic("Unhandled instruction!");
