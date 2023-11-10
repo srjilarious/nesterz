@@ -30,7 +30,7 @@ pub const Cpu6502 = struct {
     y: u8,
     pc: u16,
     sp: u8,
-    status: emu.CpuFlags,
+    status: u8,
 
     addrBus: u16,
     dataBus: u8,
@@ -53,7 +53,7 @@ pub const Cpu6502 = struct {
             .y = 0,
             .pc = 0,
             .sp = 0,
-            .status = CpuFlags.Empty,
+            .status = @intFromEnum(CpuFlags.Empty),
             .addrBus = 0,
             .dataBus = 0,
             .internalAddr = 0,
@@ -234,17 +234,16 @@ pub const Cpu6502 = struct {
     }
 
     pub fn getFlag(self: *Cpu6502, flag: CpuFlags) bool {
-        return (@intFromEnum(self.status) & @intFromEnum(flag) != 0x0);
+        return (self.status & @intFromEnum(flag) != 0x0);
     }
 
     pub fn setFlag(self: *Cpu6502, flag: CpuFlags, val: bool) void {
-        const a : u8 = @intFromEnum(self.status);
         const b : u8 = @intFromEnum(flag);
         if(val) {
-            self.status = @enumFromInt(a | b);
+            self.status |= b;
         }
         else {
-            self.status = @enumFromInt(a & ~b);
+            self.status &= ~b;
         }
     }
 
@@ -272,8 +271,8 @@ pub const Cpu6502 = struct {
             CpuOp.ASL => {
                 self.workingVal = self.workingVal << 1;
                 self.setFlag(CpuFlags.Carry, (self.workingVal & 0x100) != 0);
-                self.checkZeroFlag(@intCast(self.workingVal));
-                self.checkNegativeFlag(@intCast(self.workingVal));
+                self.checkZeroFlag(@truncate(self.workingVal));
+                self.checkNegativeFlag(@truncate(self.workingVal));
             },
             CpuOp.LDA => {
                 self.a = self.dataBus;
@@ -284,8 +283,8 @@ pub const Cpu6502 = struct {
             CpuOp.LSR => {
                 self.setFlag(CpuFlags.Carry, (self.workingVal & 0x1) != 0);
                 self.workingVal = (@as(u8, @truncate(self.workingVal)) >> 1);
-                self.checkZeroFlag(@intCast(self.workingVal));
-                self.checkNegativeFlag(@intCast(self.workingVal));
+                self.checkZeroFlag(@truncate(self.workingVal));
+                self.checkNegativeFlag(@truncate(self.workingVal));
             },
             CpuOp.LDY => {
                 self.y = self.dataBus;
