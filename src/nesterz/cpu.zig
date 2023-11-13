@@ -292,6 +292,8 @@ pub const Cpu6502 = struct {
             CpuOp.NOP => {},
             CpuOp.ORA => {
                 self.a = self.a | @as(u8, @truncate(self.workingVal));
+                self.checkZeroFlag(self.a);
+                self.checkNegativeFlag(self.a);
             },
             else => {
                 @panic("Unhandled instruction!");
