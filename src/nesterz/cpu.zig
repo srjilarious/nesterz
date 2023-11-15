@@ -15,14 +15,14 @@ const SubResult = struct {
     val: u8,
     carry: bool,
     overflow: bool,
-
-    fn init(minuend: u8, subtrahend: u8, carry: bool) SubResult {
-        const res: u16 = minuend +% ~subtrahend +% @as(u8, carry);
-        const val: u8 = @intCast(res);
-        const overflow = (minuend ^ val) & (subtrahend ^ val) & 0x80 != 0;
-        return .{ .val = val, .carry = (res & 0x100) != 0, .overflow = overflow };
-    }
 };
+
+fn subtract(minuend: u8, subtrahend: u8, carry: bool) SubResult {
+    const res: u16 = minuend +% ~subtrahend +% @intFromBool(carry);
+    const val: u8 = @intCast(res);
+    const overflow = (minuend ^ val) & (subtrahend ^ val) & 0x80 != 0;
+    return .{ .val = val, .carry = (res & 0x100) != 0, .overflow = overflow };
+}
 
 pub const Cpu6502 = struct {
     a: u8,
@@ -274,6 +274,47 @@ pub const Cpu6502 = struct {
                 self.checkZeroFlag(@truncate(self.workingVal));
                 self.checkNegativeFlag(@truncate(self.workingVal));
             },
+            CpuOp.CLC => {
+                self.setFlag(CpuFlags.Carry, false);
+            },
+            CpuOp.CLI => {
+                self.setFlag(CpuFlags.InterruptDisabled, false);
+            },
+            CpuOp.CLV => {
+                self.setFlag(CpuFlags.Overflow, false);
+            },
+            CpuOp.DEC => {
+                var wv : u8 = @truncate(self.workingVal);
+                self.workingVal = @intCast(wv -% 1);
+                self.checkZeroFlag(@truncate(self.workingVal));
+                self.checkNegativeFlag(@truncate(self.workingVal));
+            },
+            CpuOp.DEX => {
+                self.x = self.x -% 1;
+                self.checkZeroFlag(@truncate(self.x));
+                self.checkNegativeFlag(@truncate(self.x));
+            },
+            CpuOp.DEY => {
+                self.y = self.y -% 1;
+                self.checkZeroFlag(@truncate(self.y));
+                self.checkNegativeFlag(@truncate(self.y));
+            },
+            CpuOp.INC => {
+                var wv : u8 = @truncate(self.workingVal);
+                self.workingVal = @intCast(wv +% 1);
+                self.checkZeroFlag(@truncate(self.workingVal));
+                self.checkNegativeFlag(@truncate(self.workingVal));
+            },
+            CpuOp.INX => {
+                self.x = self.x +% 1;
+                self.checkZeroFlag(@truncate(self.x));
+                self.checkNegativeFlag(@truncate(self.x));
+            },
+            CpuOp.INY => {
+                self.y = self.y +% 1;
+                self.checkZeroFlag(@truncate(self.y));
+                self.checkNegativeFlag(@truncate(self.y));
+            },
             CpuOp.LDA => {
                 self.a = self.dataBus;
             },
@@ -294,6 +335,38 @@ pub const Cpu6502 = struct {
                 self.a = self.a | @as(u8, @truncate(self.workingVal));
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
+            },
+            CpuOp.SBC => {
+                const subResult = subtract(self.a, @truncate(self.workingVal), self.getFlag(CpuFlags.Carry));
+                self.a = subResult.val;
+                self.setFlag(CpuFlags.Carry, subResult.carry);
+                self.setFlag(CpuFlags.Overflow, subResult.overflow);
+                self.checkZeroFlag(self.a);
+                self.checkNegativeFlag(self.a);
+            },
+            CpuOp.SEC => {
+                self.setFlag(CpuFlags.Carry, true);
+            },
+            CpuOp.SEI => {
+                self.setFlag(CpuFlags.InterruptDisabled, true);
+            },
+            CpuOp.STA => {
+                self.shouldFetch = false;
+                self.addrBus = self.internalAddr;
+                self.dataBus = self.a;
+                self.busState = ReadWriteState.Write;
+            },
+            CpuOp.STX => {
+                self.shouldFetch = false;
+                self.addrBus = self.internalAddr;
+                self.dataBus = self.x;
+                self.busState = ReadWriteState.Write;
+            },
+            CpuOp.STY => {
+                self.shouldFetch = false;
+                self.addrBus = self.internalAddr;
+                self.dataBus = self.y;
+                self.busState = ReadWriteState.Write;
             },
             else => {
                 @panic("Unhandled instruction!");
