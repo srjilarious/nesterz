@@ -5,4 +5,5 @@ comptime {
     _ = @import("./asl_inst.zig");
     _ = @import("./lsr_inst.zig");
     _ = @import("./ora_inst.zig");
+    _ = @import("./incdec_inst.zig");
 }
