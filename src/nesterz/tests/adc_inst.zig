@@ -4,8 +4,11 @@ const fix = @import("fixtures.zig");
 
 const CpuFlags = nes.CpuFlags;
 
-test "ADC Immediate" {
-    var tn = try fix.TestNes.initWithTesData(&std.testing.allocator, &[_]u8{
+pub const Tests = [_]fix.TestFunc{ adcImmediateTest, adcZeroPageTest };
+
+// test "ADC Immediate" {
+fn adcImmediateTest() error{TestExpectedEqual}!void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
         0x69, 0x0, // ADC #$0
         0x69, 0x10, // ADC #$10
         0x69, 0x35, // ADC #$35
@@ -15,29 +18,30 @@ test "ADC Immediate" {
 
     tn.cpu.a = 0x0;
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 2);
+    try std.testing.expectEqual(tn.tickInstruction(), 2);
     try std.testing.expectEqual(tn.cpu.a, 0x0);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 2);
+    try std.testing.expectEqual(tn.tickInstruction(), 2);
     try std.testing.expectEqual(tn.cpu.a, 0x10);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 2);
+    try std.testing.expectEqual(tn.tickInstruction(), 2);
     try std.testing.expectEqual(tn.cpu.a, 0x45);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 2);
+    try std.testing.expectEqual(tn.tickInstruction(), 2);
     try std.testing.expectEqual(tn.cpu.a, 0xca);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
 }
 
-test "ADC ZeroPage" {
-    var tn = try fix.TestNes.initWithTesData(&std.testing.allocator, &[_]u8{
+// test "ADC ZeroPage" {
+fn adcZeroPageTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
         0x65, 0x10, // ADC $10
         0x65, 0x11, // ADC $11
         0x65, 0x13, // ADC $14
@@ -49,22 +53,22 @@ test "ADC ZeroPage" {
 
     tn.cpu.a = 0x0;
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 3);
+    try std.testing.expectEqual(tn.tickInstruction(), 3);
     try std.testing.expectEqual(tn.cpu.a, 0x0);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 3);
+    try std.testing.expectEqual(tn.tickInstruction(), 3);
     try std.testing.expectEqual(tn.cpu.a, 0x10);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 3);
+    try std.testing.expectEqual(tn.tickInstruction(), 3);
     try std.testing.expectEqual(tn.cpu.a, 0x45);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 3);
+    try std.testing.expectEqual(tn.tickInstruction(), 3);
     try std.testing.expectEqual(tn.cpu.a, 0xca);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);

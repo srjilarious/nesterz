@@ -4,6 +4,8 @@ const std = @import("std");
 const nes = @import("nesterz");
 const ReadWriteState = nes.cpu.ReadWriteState;
 
+pub const TestFunc = *const fn () error{TestExpectedEqual}!void;
+
 const StartTestCodeAddr = 0x200;
 pub const TestNes = struct {
     cpu: nes.Cpu6502,
@@ -11,9 +13,11 @@ pub const TestNes = struct {
     allocator: *const std.mem.Allocator,
     printDebug: bool,
 
-    pub fn init(alloc: *const std.mem.Allocator) !TestNes {
+    pub fn init(alloc: *const std.mem.Allocator) TestNes {
 
-        var mem = try alloc.alloc(u8, 1 << 16);
+        var mem = alloc.alloc(u8, 1 << 16) catch {
+            @panic("OOM");
+        };
         @memset(mem, 0);
         return .{ 
             .cpu = nes.Cpu6502.init(), 
@@ -26,11 +30,11 @@ pub const TestNes = struct {
     // This initializer is used for copying a block of instructions
     // into the start position that our tests expect, and running through
     // the reset sequence until it gets to the first instruction.
-    pub fn initWithTesData(alloc: *const std.mem.Allocator, code: []const u8) !TestNes {
-        var self = try init(alloc);
+    pub fn initWithTesData(alloc: *const std.mem.Allocator, code: []const u8) TestNes {
+        var self = init(alloc);
         self.writeBytes(StartTestCodeAddr, code);
         self.writeBytes(0xfffe, &[_]u8 {0x0, 0x2});
-        _ = try self.tickInstruction();
+        _ = self.tickInstruction();
         return self;
     }
 
@@ -38,14 +42,14 @@ pub const TestNes = struct {
         self.allocator.free(self.mem);
     }
 
-    pub fn tick(self: *TestNes) !void {
+    pub fn tick(self: *TestNes) void {
         if(self.printDebug) {
             std.debug.print("[{}] currInst=0x{x}, cycle={}\n", .{
                     self.cpu.procState, self.cpu.currInst.opCode, self.cpu.currCycle 
             });
         }
 
-        try self.cpu.tick();
+        self.cpu.tick();
         switch(self.cpu.busState) {
             ReadWriteState.Read => {
                 self.cpu.dataBus = self.mem[self.cpu.addrBus];
@@ -67,15 +71,15 @@ pub const TestNes = struct {
         }
     }
 
-    pub fn tickInstruction(self: *TestNes) !u32 {
+    pub fn tickInstruction(self: *TestNes) u32 {
         var count: u32 = 0;
         if(self.cpu.currCycle == 0) {
-            try self.tick();
+            self.tick();
             count += 1;
         }
 
         while(self.cpu.currCycle != 0) {
-            try self.tick();
+            self.tick();
             count += 1;
             if(count >= 9) {
                 std.debug.panic(

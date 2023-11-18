@@ -73,7 +73,7 @@ pub const Cpu6502 = struct {
         };
     }
 
-    pub fn tick(self: *Cpu6502) !void {
+    pub fn tick(self: *Cpu6502) void {
         self.shouldFetch = true;
         switch(self.procState) {
             CpuState.Startup => {
@@ -96,7 +96,11 @@ pub const Cpu6502 = struct {
             },
             CpuState.Normal => {
                 if(self.currCycle == 0) {
-                    self.currInst = try Instruction.fromOpCode(self.dataBus);
+                    self.currInst = Instruction.fromOpCode(self.dataBus) catch {
+                        std.debug.print("Unknown op code: 0x{x}", .{self.dataBus});
+                        @panic("Bad op code");
+
+                    };
                     self.cyclesLeft = self.currInst.numCycles;
                 }
 
