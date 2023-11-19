@@ -20,6 +20,7 @@ const White = "\x1b[97m";
 const Reset = "\x1b[0m";
 
 pub fn discoverTestsInModule(comptime mod: type) []fix.TestFunc {
+
     // @compileLog(@typeInfo(andTests).Struct.decls);
     var numTests: usize = 0;
     for (std.meta.declarations(mod)) |decl| {
@@ -51,8 +52,32 @@ pub fn discoverTestsInModule(comptime mod: type) []fix.TestFunc {
     // @compileLog(tests);
 }
 
-const Tests = discoverTestsInModule(adcTests) ++
-    discoverTestsInModule(andTests);
+pub fn discoverTests(comptime mods: anytype) []fix.TestFunc {
+    const ModsType = @TypeOf(mods);
+    const modsTypeInfo = @typeInfo(ModsType);
+    if (modsTypeInfo != .Struct) {
+        @compileError("expected tuple or struct argument of modules, found " ++ @typeName(ModsType));
+    }
+
+    const fieldsInfo = modsTypeInfo.Struct.fields;
+    const MaxTests = 10000;
+    comptime var tests: [MaxTests]fix.TestFunc = undefined;
+    comptime var totalTests: usize = 0;
+    var fieldIdx = 0;
+    inline for (fieldsInfo) |_| {
+        const fieldName = std.fmt.comptimePrint("{}", .{fieldIdx});
+        const currMod = @field(mods, fieldName);
+        const modTests = discoverTestsInModule(currMod);
+        for (modTests) |t| {
+            tests[totalTests] = t;
+            totalTests += 1;
+        }
+    }
+
+    return tests[0..totalTests];
+}
+
+const Tests = discoverTests(.{ adcTests, andTests });
 
 pub fn main() !void {
     std.debug.print("\nRunning unit tests:\n", .{});
