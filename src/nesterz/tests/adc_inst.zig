@@ -34,6 +34,10 @@ pub fn adcImmediateTest() !void {
     try std.testing.expectEqual(tn.cpu.a, 0xca);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+    std.debug.print("About to error return!\n", .{});
+    try std.testing.expectEqual(true, false);
+    std.debug.print("Forcing error return!\n", .{});
+    return error.TestExpectedEqual;
 }
 
 pub fn adcZeroPageTest() !void {
