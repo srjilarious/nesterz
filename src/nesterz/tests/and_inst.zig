@@ -4,8 +4,8 @@ const fix = @import("fixtures.zig");
 
 const CpuFlags = nes.CpuFlags;
 
-test "AND Immediate" {
-    var tn = try fix.TestNes.initWithTesData(&std.testing.allocator, &[_]u8{
+pub fn andImmediateTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
         0x29, 0xfb, // AND #$fb
         0x29, 0xab, // AND #$ab
         0x29, 0x22, // AND #$22
@@ -15,29 +15,29 @@ test "AND Immediate" {
 
     tn.cpu.a = 0xff;
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 2);
+    try std.testing.expectEqual(tn.tickInstruction(), 2);
     try std.testing.expectEqual(tn.cpu.a, 0xfb);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 2);
+    try std.testing.expectEqual(tn.tickInstruction(), 2);
     try std.testing.expectEqual(tn.cpu.a, 0xab);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 2);
+    try std.testing.expectEqual(tn.tickInstruction(), 2);
     try std.testing.expectEqual(tn.cpu.a, 0x22);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 2);
+    try std.testing.expectEqual(tn.tickInstruction(), 2);
     try std.testing.expectEqual(tn.cpu.a, 0x0);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 }
 
-test "AND ZeroPage" {
-    var tn = try fix.TestNes.initWithTesData(&std.testing.allocator, &[_]u8{
+pub fn andZeroPageTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
         0x25, 0x10, // AND $10
         0x25, 0x11, // AND $11
         0x25, 0x12, // AND $12
@@ -49,22 +49,22 @@ test "AND ZeroPage" {
 
     tn.cpu.a = 0xff;
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 3);
+    try std.testing.expectEqual(tn.tickInstruction(), 3);
     try std.testing.expectEqual(tn.cpu.a, 0xfb);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 3);
+    try std.testing.expectEqual(tn.tickInstruction(), 3);
     try std.testing.expectEqual(tn.cpu.a, 0xab);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 3);
+    try std.testing.expectEqual(tn.tickInstruction(), 3);
     try std.testing.expectEqual(tn.cpu.a, 0x22);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 
-    try std.testing.expectEqual(try tn.tickInstruction(), 3);
+    try std.testing.expectEqual(tn.tickInstruction(), 3);
     try std.testing.expectEqual(tn.cpu.a, 0x0);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);

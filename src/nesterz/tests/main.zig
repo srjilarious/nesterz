@@ -11,8 +11,6 @@ comptime {
     _ = @import("./incdec_inst.zig");
 }
 
-const Tests = adcTests.Tests; // ++ andTests.Tests;
-
 const Red = "\x1b[91m";
 const Green = "\x1b[92m";
 const Blue = "\x1b[94m";
@@ -21,38 +19,40 @@ const White = "\x1b[97m";
 
 const Reset = "\x1b[0m";
 
-fn DummyFunc() error{TestExpectedEqual}!void {}
-
-comptime {
-    @compileLog(@typeInfo(andTests).Struct.decls);
+pub fn discoverTestsInModule(comptime mod: type) []fix.TestFunc {
+    // @compileLog(@typeInfo(andTests).Struct.decls);
     var numTests: usize = 0;
-    for (std.meta.declarations(andTests)) |decl| {
-        const fld = @field(andTests, decl.name);
+    for (std.meta.declarations(mod)) |decl| {
+        const fld = @field(mod, decl.name);
         const ti = @typeInfo(@TypeOf(fld));
         if (ti == .Fn) {
             if (std.mem.endsWith(u8, decl.name, "Test")) {
                 numTests += 1;
-                @compileLog("Found TEST: ", numTests);
+                // @compileLog("Found TEST: ", numTests);
             }
         }
     }
 
     comptime var tests: [numTests]fix.TestFunc = undefined;
     var idx: usize = 0;
-    for (std.meta.declarations(andTests)) |decl| {
-        const fld = @field(andTests, decl.name);
+    for (std.meta.declarations(mod)) |decl| {
+        const fld = @field(mod, decl.name);
         const ti = @typeInfo(@TypeOf(fld));
         if (ti == .Fn) {
             if (std.mem.endsWith(u8, decl.name, "Test")) {
-                @compileLog("Adding TEST: " ++ decl.name);
+                // @compileLog("Adding TEST: " ++ decl.name);
                 tests[idx] = fld;
                 idx += 1;
             }
         }
     }
 
-    @compileLog(tests);
+    return &tests;
+    // @compileLog(tests);
 }
+
+const Tests = discoverTestsInModule(adcTests) ++
+    discoverTestsInModule(andTests);
 
 pub fn main() !void {
     std.debug.print("\nRunning unit tests:\n", .{});

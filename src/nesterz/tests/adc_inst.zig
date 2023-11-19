@@ -4,10 +4,7 @@ const fix = @import("fixtures.zig");
 
 const CpuFlags = nes.CpuFlags;
 
-pub const Tests = [_]fix.TestFunc{ adcImmediateTest, adcZeroPageTest };
-
-// test "ADC Immediate" {
-fn adcImmediateTest() error{TestExpectedEqual}!void {
+pub fn adcImmediateTest() !void {
     var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
         0x69, 0x0, // ADC #$0
         0x69, 0x10, // ADC #$10
@@ -39,8 +36,7 @@ fn adcImmediateTest() error{TestExpectedEqual}!void {
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
 }
 
-// test "ADC ZeroPage" {
-fn adcZeroPageTest() !void {
+pub fn adcZeroPageTest() !void {
     var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
         0x65, 0x10, // ADC $10
         0x65, 0x11, // ADC $11
