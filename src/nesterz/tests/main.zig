@@ -1,16 +1,17 @@
 const std = @import("std");
-const adc = @import("./adc_inst.zig");
+const adcTests = @import("./adc_inst.zig");
+const andTests = @import("./and_inst.zig");
+const fix = @import("./fixtures.zig");
 
 comptime {
     _ = @import("./cpu.zig");
-    _ = @import("./and_inst.zig");
     _ = @import("./asl_inst.zig");
     _ = @import("./lsr_inst.zig");
     _ = @import("./ora_inst.zig");
     _ = @import("./incdec_inst.zig");
 }
 
-const Tests = adc.Tests;
+const Tests = adcTests.Tests; // ++ andTests.Tests;
 
 const Red = "\x1b[91m";
 const Green = "\x1b[92m";
@@ -19,6 +20,39 @@ const Cyan = "\x1b[96m";
 const White = "\x1b[97m";
 
 const Reset = "\x1b[0m";
+
+fn DummyFunc() error{TestExpectedEqual}!void {}
+
+comptime {
+    @compileLog(@typeInfo(andTests).Struct.decls);
+    var numTests: usize = 0;
+    for (std.meta.declarations(andTests)) |decl| {
+        const fld = @field(andTests, decl.name);
+        const ti = @typeInfo(@TypeOf(fld));
+        if (ti == .Fn) {
+            if (std.mem.endsWith(u8, decl.name, "Test")) {
+                numTests += 1;
+                @compileLog("Found TEST: ", numTests);
+            }
+        }
+    }
+
+    comptime var tests: [numTests]fix.TestFunc = undefined;
+    var idx: usize = 0;
+    for (std.meta.declarations(andTests)) |decl| {
+        const fld = @field(andTests, decl.name);
+        const ti = @typeInfo(@TypeOf(fld));
+        if (ti == .Fn) {
+            if (std.mem.endsWith(u8, decl.name, "Test")) {
+                @compileLog("Adding TEST: " ++ decl.name);
+                tests[idx] = fld;
+                idx += 1;
+            }
+        }
+    }
+
+    @compileLog(tests);
+}
 
 pub fn main() !void {
     std.debug.print("\nRunning unit tests:\n", .{});
@@ -39,5 +73,5 @@ pub fn main() !void {
     std.debug.print(Green ++ "\nDone!\n\n" ++ Reset, .{});
     std.debug.print(White ++ "{} " ++ Green ++ "Passed" ++ Reset ++ ", " ++
         White ++ "{} " ++ Red ++ "Failed" ++ Reset ++ ", " ++
-        White ++ "{} " ++ Cyan ++ "Total Tests" ++ Reset, .{ testsPassed, testsFailed, testsRun });
+        White ++ "{} " ++ Cyan ++ "Total Tests" ++ Reset ++ "\n\n", .{ testsPassed, testsFailed, testsRun });
 }
