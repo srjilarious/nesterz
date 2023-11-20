@@ -1,6 +1,7 @@
 const std = @import("std");
 const nes = @import("nesterz");
 const fix = @import("fixtures.zig");
+const testz = @import("./test_runner.zig");
 
 const CpuFlags = nes.CpuFlags;
 
@@ -34,4 +35,5 @@ pub fn incZeroPageTest() !void {
     try std.testing.expectEqual(tn.readByte(0x10), 32);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(120, 0xff);
 }

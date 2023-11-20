@@ -1,3 +1,4 @@
+// zig fmt: off
 const std = @import("std");
 
 const Red = "\x1b[91m";
@@ -70,25 +71,98 @@ pub fn discoverTests(comptime mods: anytype) []TestFuncInfo {
     return tests[0..totalTests];
 }
 
+pub const TestFailure = struct { 
+    //testName: [256]u8, 
+    lineNo: usize, 
+    errorMessage: []u8,
+};
+
+pub const TestContext = struct { 
+    failures: std.ArrayList(TestFailure),
+    alloc: std.mem.Allocator,
+
+    fn init(alloc: std.mem.Allocator) TestContext {
+        return .{
+            .failures = std.ArrayList(TestFailure).init(alloc),
+            .alloc = alloc
+        };
+    }
+
+    fn deinit(self: *TestContext) void {
+        for(self.failures) |fail| {
+            self.alloc.free(fail.errorMessage);
+        }
+        self.alloc.free(self.failures);
+    }
+
+    fn expectEqual(self: *TestContext, expected: anytype, actual: anytype) !void {
+        if(expected != actual) {
+            var fail: TestFailure = .{
+                .lineNo = 123,
+                .errorMessage = undefined
+            };
+            // fail.errorMessage = "";
+            fail.errorMessage = std.fmt.allocPrint(self.alloc, 
+                Red ++ "FAIL" ++ Reset ++ ": Expected " ++ White ++ "{}" ++ Reset ++ " == " ++ White ++ "{}" ++ Reset, 
+                .{expected, actual}) catch {
+                @panic("OOM");
+            };
+
+            self.failures.append(fail) catch {
+                @panic("Unable to Append, OOM.");
+            };
+            
+            std.debug.dumpCurrentStackTrace(null);
+            return error.TestExpectedEqual;
+        }
+    }
+};
+
+var GlobalTestContext: ?TestContext = null;//TestContext.init();
+
+pub fn expectEqual(expected: anytype, actual: anytype) !void {
+    try GlobalTestContext.?.expectEqual(expected, actual);
+}
+
 pub fn runTests(tests: []TestFuncInfo, verbose: bool) void {
+    GlobalTestContext = TestContext.init(std.heap.page_allocator);
+
     if (verbose) std.debug.print("\nRunning tests:\n", .{});
     var testsRun: u32 = 0;
     var testsPassed: u32 = 0;
     var testsFailed: u32 = 0;
+
+    // Find the longest length name in the tests for formatting.
+    var verboseLength: usize = 0;
+    if (verbose) {
+        for (tests) |f| {
+            if (f.name.len > verboseLength) {
+                verboseLength = f.name.len;
+            }
+        }
+    }
+
+    // Run each of the tests.
     for (tests) |f| {
         testsRun += 1;
 
         if (verbose) {
-            std.debug.print("\nRunning " ++ White ++ "{s}" ++ Reset ++ "..", .{f.name});
+            std.debug.print("\nRunning " ++ White ++ "{s}" ++ Reset ++ "...", .{f.name});
+            var num = @min(verboseLength - f.name.len, 128);
+            while (num > 0) {
+                std.debug.print(".", .{});
+                num -= 1;
+            }
         }
+
         const res = f.func();
         if (res != error.TestExpectedEqual) {
             testsPassed += 1;
 
             if (verbose) {
-                std.debug.print(Blue ++ "\u{2713}" ++ Reset, .{});
+                std.debug.print(Green ++ "\u{2713}" ++ Reset, .{});
             } else {
-                std.debug.print(Blue ++ "." ++ Reset, .{});
+                std.debug.print(Green ++ "." ++ Reset, .{});
             }
         } else {
             testsFailed += 1;
@@ -100,4 +174,10 @@ pub fn runTests(tests: []TestFuncInfo, verbose: bool) void {
     std.debug.print("\n" ++ White ++ "{} " ++ Green ++ "Passed" ++ Reset ++ ", " ++
         White ++ "{} " ++ Red ++ "Failed" ++ Reset ++ ", " ++
         White ++ "{} " ++ Cyan ++ "Total Tests" ++ Reset ++ "\n\n", .{ testsPassed, testsFailed, testsRun });
+
+
+    // Testing
+    for(GlobalTestContext.?.failures.items) |fail| {
+        std.debug.print("{s}\n", .{fail.errorMessage});
+    }
 }
