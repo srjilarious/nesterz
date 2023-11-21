@@ -35,5 +35,5 @@ pub fn incZeroPageTest() !void {
     try std.testing.expectEqual(tn.readByte(0x10), 32);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
-    try testz.expectEqual(120, 0xff);
+    //try testz.expectEqual(120, 0xff);
 }
