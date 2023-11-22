@@ -1,6 +1,7 @@
 const std = @import("std");
 const nes = @import("nesterz");
 const fix = @import("fixtures.zig");
+const testz = @import("test_runner.zig");
 
 const CpuFlags = nes.CpuFlags;
 
@@ -14,31 +15,31 @@ pub fn lsrAccumulatorTest() !void {
     defer tn.deinit();
 
     tn.cpu.a = 0xA5;
-    try std.testing.expectEqual(tn.tickInstruction(), 2);
-    try std.testing.expectEqual(tn.cpu.a, 0x52);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.a, 0x52);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
 
-    try std.testing.expectEqual(tn.tickInstruction(), 2);
-    try std.testing.expectEqual(tn.cpu.a, 0x29);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), false);
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.a, 0x29);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), false);
 
     tn.cpu.setFlag(CpuFlags.Carry, true);
-    try std.testing.expectEqual(tn.tickInstruction(), 2);
-    try std.testing.expectEqual(tn.cpu.a, 0x14);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.a, 0x14);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
 
     tn.cpu.a = 0x01;
-    try std.testing.expectEqual(tn.tickInstruction(), 2);
-    try std.testing.expectEqual(tn.cpu.a, 0x00);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.a, 0x00);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
 }
 
 pub fn lsrZeroPageTest() !void {
@@ -51,29 +52,29 @@ pub fn lsrZeroPageTest() !void {
     defer tn.deinit();
 
     tn.writeByte(0x10, 0xa5);
-    try std.testing.expectEqual(tn.tickInstruction(), 5);
-    try std.testing.expectEqual(tn.readByte(0x10), 0x52);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.readByte(0x10), 0x52);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
 
-    try std.testing.expectEqual(tn.tickInstruction(), 5);
-    try std.testing.expectEqual(tn.readByte(0x10), 0x29);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), false);
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.readByte(0x10), 0x29);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), false);
 
     tn.cpu.setFlag(CpuFlags.Carry, true);
-    try std.testing.expectEqual(tn.tickInstruction(), 5);
-    try std.testing.expectEqual(tn.readByte(0x10), 0x14);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.readByte(0x10), 0x14);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
 
     tn.writeByte(0x10, 0x1);
-    try std.testing.expectEqual(tn.tickInstruction(), 5);
-    try std.testing.expectEqual(tn.readByte(0x10), 0x00);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.readByte(0x10), 0x00);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
 }

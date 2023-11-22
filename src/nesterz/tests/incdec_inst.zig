@@ -16,24 +16,24 @@ pub fn incZeroPageTest() !void {
 
     tn.writeBytes(0x10, &[_]u8{ 30, 0xff, 0xfe });
 
-    try std.testing.expectEqual(tn.tickInstruction(), 5);
-    try std.testing.expectEqual(tn.readByte(0x10), 31);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.readByte(0x10), 31);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 
-    try std.testing.expectEqual(tn.tickInstruction(), 5);
-    try std.testing.expectEqual(tn.readByte(0x11), 0);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.readByte(0x11), 0);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 
-    try std.testing.expectEqual(tn.tickInstruction(), 5);
-    try std.testing.expectEqual(tn.readByte(0x12), 0xff);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.readByte(0x12), 0xff);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
 
-    try std.testing.expectEqual(tn.tickInstruction(), 5);
-    try std.testing.expectEqual(tn.readByte(0x10), 32);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
-    try std.testing.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.readByte(0x10), 32);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
     //try testz.expectEqual(120, 0xff);
 }
