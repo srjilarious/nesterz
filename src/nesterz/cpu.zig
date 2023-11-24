@@ -143,7 +143,7 @@ pub const Cpu6502 = struct {
 
     fn handleAdressMode(self: *Cpu6502) void {
         switch(self.currInst.mode) {
-            AddressMode.Accumulator => {
+            .Accumulator => {
                 if(self.currCycle == 0) {
                     self.workingVal = @as(u16, self.a);
                     self.shouldFetch = false;
@@ -154,15 +154,15 @@ pub const Cpu6502 = struct {
                     @panic("Unexpected cycle!");
                 }
             },
-            AddressMode.Implied => {
+            .Implied => {
                 if(self.currCycle < self.currInst.numCycles - 1) {
                     self.shouldFetch = false;
                 }
             },
-            AddressMode.Immediate => {
+            .Immediate => {
                 self.workingVal = @as(u16, self.dataBus);
             },
-            AddressMode.ZeroPage => {
+            .ZeroPage => {
                 if(self.currCycle == 1) {
                     self.shouldFetch = false;
                     self.internalAddr = self.dataBus;
@@ -184,12 +184,65 @@ pub const Cpu6502 = struct {
                     self.busState = ReadWriteState.Write;
                 }
             },
-            // AddressMode.ZeroPageX or AddressMode.ZeroPageY => {
-            //     
-            // },
-            // AddressMode.Absolute => {
-            //     
-            // },
+            .ZeroPageX, .ZeroPageY => {
+                if(self.currCycle == 1) {
+                    self.shouldFetch = false;
+                    self.internalAddr = self.dataBus;
+                }
+                else if(self.currCycle == 2) {
+                    self.shouldFetch = false;
+
+                    if(self.currInst.mode == .ZeroPageX) {
+                        self.internalAddr +%= @as(u16, self.x);
+                    }
+                    else {
+                        self.internalAddr +%= @as(u16, self.y);
+                    }
+
+                    self.addrBus = self.internalAddr;
+                    self.busState = ReadWriteState.Read;
+                }
+                else if(self.currCycle == 3) {
+                    self.workingVal = @intCast(self.dataBus);
+                    if(emu.storesBackValue(self.currInst.op)) {
+                        self.shouldFetch = false;
+                    }
+                }
+                else if(self.currCycle == 4) {
+                    self.shouldFetch = false;
+                    self.addrBus = self.internalAddr;
+                    self.dataBus = @truncate(self.workingVal);
+                    self.busState = ReadWriteState.Write;
+                }
+                
+            },
+            .Absolute => {
+                if(self.currCycle == 1) {
+                    self.internalAddr = @intCast(self.dataBus);
+                } 
+                else if(self.currCycle == 2) {
+                    self.internalAddr |= @as(u16, self.dataBus) << 8;
+
+                    self.addrBus = self.internalAddr;
+                    self.busState = ReadWriteState.Read;
+                    self.shouldFetch = false;
+                } 
+                else if(self.currCycle == 3) {
+                    self.workingVal = @intCast(self.dataBus);
+                    if(emu.storesBackValue(self.currInst.op)) {
+                        self.shouldFetch = false;
+                    }
+                }
+                // If we are on cycle 5 of an absolute addr instruction
+                // it means we're storing a result back to the memory
+                // location.
+                else if(self.currCycle == 4) {
+                    self.shouldFetch = false;
+                    self.addrBus = self.internalAddr;
+                    self.dataBus = @as(u8, @truncate(self.workingVal));
+                    self.busState = ReadWriteState.Write;
+                }
+            },
             // AddressMode.AbsoluteX or AddressMode.AbsoluteY => {
             //     
             // },
