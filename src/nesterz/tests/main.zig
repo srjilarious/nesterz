@@ -13,5 +13,11 @@ const Tests = tr.discoverTests(.{
 });
 
 pub fn main() !void {
-    tr.runTests(Tests, true);
+    // for (std.os.argv) |arg| {
+    //     const firstArg = std.mem.span(arg);
+    //     std.debug.print("arg: {s}\n", .{firstArg});
+    // }
+    const verbose = if(std.os.argv.len > 1 and std.mem.eql(u8, "verbose", std.mem.span(std.os.argv[1]))) true else false;
+    
+    tr.runTests(Tests, verbose);
 }

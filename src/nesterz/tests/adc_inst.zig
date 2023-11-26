@@ -71,3 +71,15 @@ pub fn adcZeroPageTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
 }
+
+pub fn skip_adcZeroPageXTest() !void {}
+
+pub fn skip_adcAbsoluteTest() !void {}
+
+pub fn skip_adcAbsoluteXTest() !void {}
+
+pub fn skip_adcAbsoluteYTest() !void {}
+
+pub fn skip_adcIndirectXTest() !void {}
+
+pub fn skip_adcIndirectYTest() !void {}

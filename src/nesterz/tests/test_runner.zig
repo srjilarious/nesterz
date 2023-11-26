@@ -1,16 +1,22 @@
 // zig fmt: off
 const std = @import("std");
 
+const DarkGray = "\x1b[90m";
 const Red = "\x1b[91m";
 const Green = "\x1b[92m";
 const Blue = "\x1b[94m";
 const Cyan = "\x1b[96m";
+const Yellow = "\x1b[93m";
 const White = "\x1b[97m";
 
 const Reset = "\x1b[0m";
 
 pub const TestFunc = *const fn () error{TestExpectedEqual}!void;
-pub const TestFuncInfo = struct { func: TestFunc, name: []const u8 };
+pub const TestFuncInfo = struct { 
+    func: TestFunc, 
+    name: []const u8,
+    skip: bool
+};
 
 pub fn discoverTestsInModule(comptime mod: type) []TestFuncInfo {
 
@@ -34,8 +40,13 @@ pub fn discoverTestsInModule(comptime mod: type) []TestFuncInfo {
         const ti = @typeInfo(@TypeOf(fld));
         if (ti == .Fn) {
             if (std.mem.endsWith(u8, decl.name, "Test")) {
+                const skip = std.mem.startsWith(u8, decl.name, "skip_");
                 // @compileLog("Adding TEST: " ++ decl.name);
-                tests[idx] = .{ .func = fld, .name = decl.name };
+                tests[idx] = .{ 
+                    .func = fld, 
+                    .name = decl.name,
+                    .skip = skip,
+                };
                 idx += 1;
             }
         }
@@ -127,10 +138,17 @@ pub fn expectEqual(expected: anytype, actual: anytype) !void {
 pub fn runTests(tests: []TestFuncInfo, verbose: bool) void {
     GlobalTestContext = TestContext.init(std.heap.page_allocator);
 
-    if (verbose) std.debug.print("\nRunning tests:\n", .{});
+    if (verbose) {
+        std.debug.print("\nRunning tests:\n", .{});
+    } 
+    else {
+        std.debug.print("\n", .{});
+    }
+
     var testsRun: u32 = 0;
     var testsPassed: u32 = 0;
     var testsFailed: u32 = 0;
+    var testsSkipped: u32 = 0;
 
     // Find the longest length name in the tests for formatting.
     var verboseLength: usize = 0;
@@ -146,13 +164,23 @@ pub fn runTests(tests: []TestFuncInfo, verbose: bool) void {
     for (tests) |f| {
         testsRun += 1;
 
+        const testPrintName = if(f.skip) f.name[5..] else f.name;
+
         if (verbose) {
-            std.debug.print("\nRunning " ++ White ++ "{s}" ++ Reset ++ "...", .{f.name});
-            var num = @min(verboseLength - f.name.len, 128);
+            std.debug.print("\nRunning " ++ "{s}{s}" ++ Reset ++ "...", .{
+                if(f.skip) DarkGray else White,
+                testPrintName});
+            var num = @min(verboseLength - testPrintName.len, 128);
             while (num > 0) {
                 std.debug.print(".", .{});
                 num -= 1;
             }
+        }
+
+        if(f.skip) {
+            std.debug.print(Yellow ++ "\u{21b7}" ++ Reset, .{});
+            testsSkipped += 1;
+            continue;
         }
 
         const res = f.func();
@@ -173,7 +201,14 @@ pub fn runTests(tests: []TestFuncInfo, verbose: bool) void {
     //std.debug.print(Green ++ "\nDone!\n\n" ++ Reset, .{});
     std.debug.print("\n" ++ White ++ "{} " ++ Green ++ "Passed" ++ Reset ++ ", " ++
         White ++ "{} " ++ Red ++ "Failed" ++ Reset ++ ", " ++
-        White ++ "{} " ++ Cyan ++ "Total Tests" ++ Reset ++ "\n\n", .{ testsPassed, testsFailed, testsRun });
+        White ++ "{} " ++ Yellow ++ "Skipped" ++ Reset ++ ", " ++
+        White ++ "{} " ++ Cyan ++ "Total Tests" ++ Reset ++ "\n\n", 
+    .{ 
+        testsPassed, 
+        testsFailed, 
+        testsSkipped,
+        testsRun 
+    });
 
 
     // Testing
