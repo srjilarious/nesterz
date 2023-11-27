@@ -305,17 +305,17 @@ pub const Cpu6502 = struct {
     }
 
     fn checkZeroFlag(self: *Cpu6502, val: u8) void {
-        self.setFlag(CpuFlags.Zero, val == 0);
+        self.setFlag(.Zero, val == 0);
     }
 
     fn checkNegativeFlag(self: *Cpu6502, val: u8) void {
-        self.setFlag(CpuFlags.Negative, (val & 0x80) != 0);
+        self.setFlag(.Negative, (val & 0x80) != 0);
     }
 
     fn handleInstExec(self: *Cpu6502) void {
         switch(self.currInst.op) {
             CpuOp.ADC => {
-                var result: u16 = @as(u16, self.a) +% self.workingVal + @intFromBool(self.getFlag(CpuFlags.Carry));
+                var result: u16 = @as(u16, self.a) +% self.workingVal + @intFromBool(self.getFlag(.Carry));
                 self.a = @truncate(result);
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
@@ -327,18 +327,18 @@ pub const Cpu6502 = struct {
             },
             CpuOp.ASL => {
                 self.workingVal = self.workingVal << 1;
-                self.setFlag(CpuFlags.Carry, (self.workingVal & 0x100) != 0);
+                self.setFlag(.Carry, (self.workingVal & 0x100) != 0);
                 self.checkZeroFlag(@truncate(self.workingVal));
                 self.checkNegativeFlag(@truncate(self.workingVal));
             },
             CpuOp.CLC => {
-                self.setFlag(CpuFlags.Carry, false);
+                self.setFlag(.Carry, false);
             },
             CpuOp.CLI => {
-                self.setFlag(CpuFlags.InterruptDisabled, false);
+                self.setFlag(.InterruptsDisabled, false);
             },
             CpuOp.CLV => {
-                self.setFlag(CpuFlags.Overflow, false);
+                self.setFlag(.Overflow, false);
             },
             CpuOp.DEC => {
                 var wv : u8 = @truncate(self.workingVal);
@@ -405,18 +405,18 @@ pub const Cpu6502 = struct {
                 self.checkNegativeFlag(self.a);
             },
             CpuOp.SBC => {
-                const subResult = subtract(self.a, @truncate(self.workingVal), self.getFlag(CpuFlags.Carry));
+                const subResult = subtract(self.a, @truncate(self.workingVal), self.getFlag(.Carry));
                 self.a = subResult.val;
-                self.setFlag(CpuFlags.Carry, subResult.carry);
-                self.setFlag(CpuFlags.Overflow, subResult.overflow);
+                self.setFlag(.Carry, subResult.carry);
+                self.setFlag(.Overflow, subResult.overflow);
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
             },
             CpuOp.SEC => {
-                self.setFlag(CpuFlags.Carry, true);
+                self.setFlag(.Carry, true);
             },
             CpuOp.SEI => {
-                self.setFlag(CpuFlags.InterruptDisabled, true);
+                self.setFlag(.InterruptsDisabled, true);
             },
             CpuOp.STA => {
                 self.shouldFetch = false;
