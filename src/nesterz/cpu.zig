@@ -379,9 +379,13 @@ pub const Cpu6502 = struct {
             },
             CpuOp.LDA => {
                 self.a = self.dataBus;
+                self.checkZeroFlag(self.a);
+                self.checkNegativeFlag(self.a);
             },
             CpuOp.LDX => {
                 self.x = self.dataBus;
+                self.checkZeroFlag(self.x);
+                self.checkNegativeFlag(self.x);
             },
             CpuOp.LSR => {
                 self.setFlag(CpuFlags.Carry, (self.workingVal & 0x1) != 0);
@@ -391,6 +395,8 @@ pub const Cpu6502 = struct {
             },
             CpuOp.LDY => {
                 self.y = self.dataBus;
+                self.checkZeroFlag(self.y);
+                self.checkNegativeFlag(self.y);
             },
             CpuOp.NOP => {},
             CpuOp.ORA => {
