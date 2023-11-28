@@ -27,6 +27,7 @@ pub fn aslAccumulatorTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 
     try testz.expectEqual(tn.tickInstruction(), 2);
+    // try testz.expectEqual(true, false);
     try testz.expectEqual(tn.cpu.a, 0x88);
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
