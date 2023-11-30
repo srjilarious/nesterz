@@ -11,7 +11,8 @@ const Tests = tr.discoverTests(.{
     @import("./incdec_inst.zig"),
     @import("./load_inst.zig"),
     @import("./lsr_inst.zig"),
-    @import("./ora_inst.zig")
+    @import("./ora_inst.zig"),
+    @import("./sbc_inst.zig"),
 });
 
 pub fn main() void {
