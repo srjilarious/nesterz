@@ -193,10 +193,10 @@ pub const Cpu6502 = struct {
                     self.shouldFetch = false;
 
                     if(self.currInst.mode == .ZeroPageX) {
-                        self.internalAddr +%= @as(u16, self.x);
+                        self.internalAddr = (self.internalAddr +% @as(u16, self.x)) & 0xff;
                     }
                     else {
-                        self.internalAddr +%= @as(u16, self.y);
+                        self.internalAddr = (self.internalAddr +% @as(u16, self.y)) & 0xff;
                     }
 
                     self.addrBus = self.internalAddr;
