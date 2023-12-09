@@ -243,13 +243,52 @@ pub const Cpu6502 = struct {
                     self.busState = ReadWriteState.Write;
                 }
             },
-            // AddressMode.AbsoluteX or AddressMode.AbsoluteY => {
-            //     
-            // },
-            // AddressMode.Relative => {
-            //     
-            // },
-            // AddressMode.Indirect => {
+            .AbsoluteX, .AbsoluteY => {
+                if(self.currCycle == 1) {
+                    self.internalAddr = @intCast(self.dataBus);
+                } 
+                else if(self.currCycle == 2) {
+                    self.internalAddr |= @as(u16, self.dataBus) << 8;
+
+
+                    if(self.currInst.mode == .ZeroPageX) {
+                        self.internalAddr = (self.internalAddr +% @as(u16, self.x)) & 0xff;
+                    }
+                    else {
+                        self.internalAddr = (self.internalAddr +% @as(u16, self.y)) & 0xff;
+                    }
+
+                    self.addrBus = self.internalAddr;
+                    self.busState = ReadWriteState.Read;
+                    self.shouldFetch = false;
+                } 
+                else if(self.currCycle == 3) {
+                    self.workingVal = @intCast(self.dataBus);
+                    if(emu.storesBackValue(self.currInst.op)) {
+                        self.shouldFetch = false;
+                    }
+                }
+                // If we are on cycle 5 of an absolute addr instruction
+                // it means we're storing a result back to the memory
+                // location.
+                else if(self.currCycle == 4) {
+                    if(!emu.isStore(self.currInst.op)) {
+                        self.shouldFetch = false;
+                        self.addrBus = self.internalAddr;
+                        self.dataBus = @as(u8, @truncate(self.workingVal));
+                        self.busState = ReadWriteState.Write;
+                    }
+                }
+                else if(self.currCycle == 5) {
+                    self.shouldFetch = false;
+                }
+            },
+            .Relative => {
+                if(self.currCycle == 1) {
+                    self.internalAddr = @intCast(self.dataBus);
+                }
+            },
+            // .Indirect => {
             //     
             // },
             else => {
@@ -290,6 +329,17 @@ pub const Cpu6502 = struct {
         };
     }
 
+    fn takeBranch(self: *Cpu6502) void {
+        const rel: i8 = @bitCast(@as(u8, @truncate(self.internalAddr)));
+        self.pc +%= @intCast(rel);
+        self.shouldFetch = false;
+        self.cyclesLeft += 1;
+    }
+    
+    fn doSubtract(self: *Cpu6502, minuend: u8) SubResult {
+        return subtract(minuend, @truncate(self.workingVal), self.getFlag(.Carry));
+    }
+
     pub fn getFlag(self: *Cpu6502, flag: CpuFlags) bool {
         return (self.status & @intFromEnum(flag) != 0x0);
     }
@@ -314,97 +364,140 @@ pub const Cpu6502 = struct {
 
     fn handleInstExec(self: *Cpu6502) void {
         switch(self.currInst.op) {
-            CpuOp.ADC => {
+            .ADC => {
                 var result: u16 = @as(u16, self.a) +% self.workingVal + @intFromBool(self.getFlag(.Carry));
                 self.a = @truncate(result);
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
             },
-            CpuOp.AND => {
+            .AND => {
                 self.a = self.a & @as(u8, @truncate(self.workingVal));
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
             },
-            CpuOp.ASL => {
+            .ASL => {
                 self.workingVal = self.workingVal << 1;
                 self.setFlag(.Carry, (self.workingVal & 0x100) != 0);
                 self.checkZeroFlag(@truncate(self.workingVal));
                 self.checkNegativeFlag(@truncate(self.workingVal));
             },
-            CpuOp.CLC => {
+            .BCC => {
+                if(!self.getFlag(.Carry)) {
+                    self.takeBranch();
+                }
+            },
+            .BCS => {
+                if(self.getFlag(.Carry)) {
+                    self.takeBranch();
+                }
+            },
+            .BEQ => {
+                if(self.getFlag(.Zero)) {
+                    self.takeBranch();
+                }
+            },
+            .BMI => {
+                if(self.getFlag(.Negative)) {
+                    self.takeBranch();
+                }
+            },
+            .BNE => {
+                if(!self.getFlag(.Zero)) {
+                    self.takeBranch();
+                }
+            },
+            .BPL => {
+                if(!self.getFlag(.Negative)) {
+                    self.takeBranch();
+                }
+            },
+            .CLC => {
                 self.setFlag(.Carry, false);
             },
-            CpuOp.CLI => {
+            .CLI => {
                 self.setFlag(.InterruptsDisabled, false);
             },
-            CpuOp.CLV => {
+            .CLV => {
                 self.setFlag(.Overflow, false);
             },
-            CpuOp.DEC => {
+            .CMP => {
+                self.setFlag(.Carry, true);
+                const result = self.doSubtract(self.a);
+                self.setFlag(.Carry, self.a >= @as(u8, @truncate(self.workingVal)));
+                self.checkZeroFlag(result.val);
+                self.checkNegativeFlag(result.val);
+            },
+            .DEC => {
                 var wv : u8 = @truncate(self.workingVal);
                 self.workingVal = @intCast(wv -% 1);
                 self.checkZeroFlag(@truncate(self.workingVal));
                 self.checkNegativeFlag(@truncate(self.workingVal));
             },
-            CpuOp.DEX => {
+            .DEX => {
                 self.x = self.x -% 1;
                 self.checkZeroFlag(@truncate(self.x));
                 self.checkNegativeFlag(@truncate(self.x));
             },
-            CpuOp.DEY => {
+            .DEY => {
                 self.y = self.y -% 1;
                 self.checkZeroFlag(@truncate(self.y));
                 self.checkNegativeFlag(@truncate(self.y));
             },
-            CpuOp.EOR => {
+            .EOR => {
                 self.a = self.a ^ @as(u8, @truncate(self.workingVal));
                 self.checkZeroFlag(@truncate(self.workingVal));
                 self.checkNegativeFlag(@truncate(self.workingVal));
             },
-            CpuOp.INC => {
+            .INC => {
                 var wv : u8 = @truncate(self.workingVal);
                 self.workingVal = @intCast(wv +% 1);
                 self.checkZeroFlag(@truncate(self.workingVal));
                 self.checkNegativeFlag(@truncate(self.workingVal));
             },
-            CpuOp.INX => {
+            .INX => {
                 self.x = self.x +% 1;
                 self.checkZeroFlag(@truncate(self.x));
                 self.checkNegativeFlag(@truncate(self.x));
             },
-            CpuOp.INY => {
+            .INY => {
                 self.y = self.y +% 1;
                 self.checkZeroFlag(@truncate(self.y));
                 self.checkNegativeFlag(@truncate(self.y));
             },
-            CpuOp.LDA => {
+            .JMP => {
+                self.shouldFetch = false;
+                self.pc = self.internalAddr +% 1;
+                self.addrBus = self.internalAddr;
+                self.busState = .Read;
+            },
+            .LDA => {
                 self.a = self.dataBus;
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
             },
-            CpuOp.LDX => {
+            .LDX => {
                 self.x = self.dataBus;
                 self.checkZeroFlag(self.x);
                 self.checkNegativeFlag(self.x);
             },
-            CpuOp.LSR => {
+            .LSR => {
                 self.setFlag(CpuFlags.Carry, (self.workingVal & 0x1) != 0);
                 self.workingVal = (@as(u8, @truncate(self.workingVal)) >> 1);
                 self.checkZeroFlag(@truncate(self.workingVal));
                 self.checkNegativeFlag(@truncate(self.workingVal));
             },
-            CpuOp.LDY => {
+            .LDY => {
                 self.y = self.dataBus;
                 self.checkZeroFlag(self.y);
                 self.checkNegativeFlag(self.y);
             },
-            CpuOp.NOP => {},
-            CpuOp.ORA => {
+            .NOP => {},
+            .ORA => {
                 self.a = self.a | @as(u8, @truncate(self.workingVal));
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
             },
-            CpuOp.SBC => {
+            .SBC => {
                 const subResult = subtract(self.a, @truncate(self.workingVal), self.getFlag(.Carry));
                 self.a = subResult.val;
                 self.setFlag(.Carry, subResult.carry);
@@ -412,25 +505,25 @@ pub const Cpu6502 = struct {
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
             },
-            CpuOp.SEC => {
+            .SEC => {
                 self.setFlag(.Carry, true);
             },
-            CpuOp.SEI => {
+            .SEI => {
                 self.setFlag(.InterruptsDisabled, true);
             },
-            CpuOp.STA => {
+            .STA => {
                 self.shouldFetch = false;
                 self.addrBus = self.internalAddr;
                 self.dataBus = self.a;
                 self.busState = ReadWriteState.Write;
             },
-            CpuOp.STX => {
+            .STX => {
                 self.shouldFetch = false;
                 self.addrBus = self.internalAddr;
                 self.dataBus = self.x;
                 self.busState = ReadWriteState.Write;
             },
-            CpuOp.STY => {
+            .STY => {
                 self.shouldFetch = false;
                 self.addrBus = self.internalAddr;
                 self.dataBus = self.y;
