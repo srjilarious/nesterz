@@ -69,3 +69,36 @@ pub fn aslZeroPageTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 }
+
+pub fn aslZeroPageXTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x16, 0x0d, // ASL $0d,X
+        0x16, 0x0d, // ASL $0d,X
+        0x16, 0x0d, // ASL $0d,X
+        0x16, 0x0d, // ASL $0d,X
+    });
+    defer tn.deinit();
+
+    tn.writeByte(0x10, 0x51);
+    tn.cpu.x = 0x3;
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x10), 0xa2);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x10), 0x44);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x10), 0x88);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x10), 0x10);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+}
