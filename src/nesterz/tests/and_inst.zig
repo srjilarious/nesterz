@@ -138,3 +138,38 @@ pub fn andAbsoluteTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 }
+
+pub fn andAbsoluteXTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x3D, 0x10, 0x30, // AND $3010,X
+        0x3D, 0x11, 0x30, // AND $3011,X
+        0x3D, 0x12, 0x30, // AND $3012,X
+        0x3D, 0x13, 0x30, // AND $3013,X
+    });
+    defer tn.deinit();
+
+    tn.writeBytes(0x3013, &[_]u8{ 0xfb, 0xab, 0x22, 0x0 });
+
+    tn.cpu.a = 0xff;
+    tn.cpu.x = 3;
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.a, 0xfb);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.a, 0xab);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.a, 0x22);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.a, 0x0);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+}

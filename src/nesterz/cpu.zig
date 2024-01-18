@@ -250,12 +250,11 @@ pub const Cpu6502 = struct {
                 else if(self.currCycle == 2) {
                     self.internalAddr |= @as(u16, self.dataBus) << 8;
 
-
-                    if(self.currInst.mode == .ZeroPageX) {
-                        self.internalAddr = (self.internalAddr +% @as(u16, self.x)) & 0xff;
+                    if(self.currInst.mode == .AbsoluteX) {
+                        self.internalAddr = (self.internalAddr +% @as(u16, self.x));
                     }
                     else {
-                        self.internalAddr = (self.internalAddr +% @as(u16, self.y)) & 0xff;
+                        self.internalAddr = (self.internalAddr +% @as(u16, self.y));
                     }
 
                     self.addrBus = self.internalAddr;
