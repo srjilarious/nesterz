@@ -364,7 +364,7 @@ pub const Cpu6502 = struct {
     fn handleInstExec(self: *Cpu6502) void {
         switch(self.currInst.op) {
             .ADC => {
-                var result: u16 = @as(u16, self.a) +% self.workingVal + @intFromBool(self.getFlag(.Carry));
+                const result: u16 = @as(u16, self.a) +% self.workingVal + @intFromBool(self.getFlag(.Carry));
                 self.a = @truncate(result);
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
@@ -427,7 +427,7 @@ pub const Cpu6502 = struct {
                 self.checkNegativeFlag(result.val);
             },
             .DEC => {
-                var wv : u8 = @truncate(self.workingVal);
+                const wv : u8 = @truncate(self.workingVal);
                 self.workingVal = @intCast(wv -% 1);
                 self.checkZeroFlag(@truncate(self.workingVal));
                 self.checkNegativeFlag(@truncate(self.workingVal));
@@ -448,7 +448,7 @@ pub const Cpu6502 = struct {
                 self.checkNegativeFlag(@truncate(self.workingVal));
             },
             .INC => {
-                var wv : u8 = @truncate(self.workingVal);
+                const wv : u8 = @truncate(self.workingVal);
                 self.workingVal = @intCast(wv +% 1);
                 self.checkZeroFlag(@truncate(self.workingVal));
                 self.checkNegativeFlag(@truncate(self.workingVal));

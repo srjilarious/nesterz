@@ -15,7 +15,7 @@ pub const TestNes = struct {
 
     pub fn init(alloc: *const std.mem.Allocator) TestNes {
 
-        var mem = alloc.alloc(u8, 1 << 16) catch {
+        const mem = alloc.alloc(u8, 1 << 16) catch {
             @panic("OOM");
         };
         @memset(mem, 0);
