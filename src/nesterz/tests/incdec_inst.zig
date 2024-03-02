@@ -70,3 +70,9 @@ pub fn decZeroPageTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
     //try testz.expectEqual(120, 0xff);
 }
+
+pub fn skip_decZeroPageXTest() !void {}
+
+pub fn skip_decAbsoluteTest() !void {}
+
+pub fn skip_decAbsoluteXTest() !void {}

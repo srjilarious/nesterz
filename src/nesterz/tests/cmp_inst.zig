@@ -26,3 +26,17 @@ pub fn cmpImmediateTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(.Negative), false);
     try testz.expectEqual(tn.cpu.getFlag(.Carry), true);
 }
+
+pub fn skip_cmpZeroPageTest() !void {}
+
+pub fn skip_cmpZeroPageXTest() !void {}
+
+pub fn skip_cmpAbsoluteTest() !void {}
+
+pub fn skip_cmpAbsoluteXTest() !void {}
+
+pub fn skip_cmpAbsoluteYTest() !void {}
+
+pub fn skip_cmpIndirectXTest() !void {}
+
+pub fn skip_cmpIndirectYTest() !void {}
