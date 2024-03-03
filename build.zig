@@ -24,9 +24,9 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    const nesterz = b.addModule("nesterz", .{ .source_file = .{ .path = "src/nesterz/nesterz.zig" } });
+    const nesterz = b.addModule("nesterz", .{ .root_source_file = .{ .path = "src/nesterz/nesterz.zig" } });
 
-    exe.addModule("nesterz", nesterz);
+    exe.root_module.addImport("nesterz", nesterz);
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
@@ -88,7 +88,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    tests.addModule("nesterz", nesterz);
+    tests.root_module.addImport("nesterz", nesterz);
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
