@@ -74,7 +74,28 @@ pub fn cmpZeroPageXTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(.Carry), true);
 }
 
-pub fn skip_cmpAbsoluteTest() !void {}
+pub fn cmpAbsoluteTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0xCD, 0x10, 0x30, // CMP $3010
+        0xCD, 0x12, 0x30, // CMP $3012
+    });
+    defer tn.deinit();
+
+    tn.writeBytes(0x3010, &[_]u8{ 16, 0x12, 0x01, 0xcd });
+    tn.cpu.a = 16;
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.a, 16);
+    try testz.expectEqual(tn.cpu.getFlag(.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(.Carry), true);
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.a, 16);
+    try testz.expectEqual(tn.cpu.getFlag(.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(.Carry), true);
+}
 
 pub fn skip_cmpAbsoluteXTest() !void {}
 
