@@ -426,6 +426,13 @@ pub const Cpu6502 = struct {
                 self.checkZeroFlag(result.val);
                 self.checkNegativeFlag(result.val);
             },
+            .CPX => {
+                self.setFlag(.Carry, true);
+                const result = self.doSubtract(self.x);
+                self.setFlag(.Carry, self.x >= @as(u8, @truncate(self.workingVal)));
+                self.checkZeroFlag(result.val);
+                self.checkNegativeFlag(result.val);
+            },
             .DEC => {
                 const wv : u8 = @truncate(self.workingVal);
                 self.workingVal = @intCast(wv -% 1);
