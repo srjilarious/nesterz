@@ -27,6 +27,27 @@ pub fn cpyImmediateTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(.Carry), true);
 }
 
-pub fn skip_cpyZeroPageTest() !void {}
+pub fn cpyZeroPageTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0xC4, 0x10, // CPY $10
+        0xC4, 0x12, // CPY $12
+    });
+    defer tn.deinit();
+
+    tn.writeBytes(0x10, &[_]u8{ 16, 0x12, 0x01, 0xcd });
+    tn.cpu.y = 16;
+
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.cpu.y, 16);
+    try testz.expectEqual(tn.cpu.getFlag(.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(.Carry), true);
+
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.cpu.y, 16);
+    try testz.expectEqual(tn.cpu.getFlag(.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(.Carry), true);
+}
 
 pub fn skip_cpyAbsoluteTest() !void {}
