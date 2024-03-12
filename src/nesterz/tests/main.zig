@@ -9,6 +9,7 @@ const Tests = tr.discoverTests(.{
     @import("./asl_inst.zig"),
     @import("./cmp_inst.zig"),
     @import("./cpx_inst.zig"),
+    @import("./cpy_inst.zig"),
     @import("./flag_inst.zig"),
     @import("./incdec_inst.zig"),
     @import("./load_inst.zig"),
