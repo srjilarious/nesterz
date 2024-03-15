@@ -50,4 +50,25 @@ pub fn cpxZeroPageTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(.Carry), true);
 }
 
-pub fn skip_cpxAbsoluteTest() !void {}
+pub fn cpxAbsoluteTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0xEC, 0x10, 0x30, // CPX $3010
+        0xEC, 0x12, 0x30, // CPX $3012
+    });
+    defer tn.deinit();
+
+    tn.writeBytes(0x3010, &[_]u8{ 16, 0x12, 0x01, 0xcd });
+    tn.cpu.x = 16;
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.x, 16);
+    try testz.expectEqual(tn.cpu.getFlag(.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(.Carry), true);
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.x, 16);
+    try testz.expectEqual(tn.cpu.getFlag(.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(.Carry), true);
+}
