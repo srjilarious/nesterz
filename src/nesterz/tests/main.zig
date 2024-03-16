@@ -1,9 +1,10 @@
 // zig fmt: off
 const std = @import("std");
 const fix = @import("./fixtures.zig");
-const tr = @import("./test_runner.zig");
+const testz = @import("testz");
 
-const Tests = tr.discoverTests(.{ 
+
+const Tests = testz.discoverTests(.{ 
     @import("./adc_inst.zig"),
     @import("./and_inst.zig"),
     @import("./asl_inst.zig"),
@@ -26,5 +27,5 @@ pub fn main() void {
     // }
     const verbose = if(std.os.argv.len > 1 and std.mem.eql(u8, "verbose", std.mem.span(std.os.argv[1]))) true else false;
     
-    _ = tr.runTests(Tests, verbose);
+    _ = testz.runTests(Tests, verbose);
 }

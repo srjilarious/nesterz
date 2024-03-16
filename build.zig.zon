@@ -1,0 +1,40 @@
+.{
+    .name = "nesterz",
+    .version = "0.1.0",
+    .paths = .{"src"},
+    .dependencies = .{
+        .testz = .{
+            .url = "https://github.com/srjilarious/testz/archive/f122e25.tar.gz",
+            .hash = "122073c2ca75e0746734a95658a0e70fd672b4193e26953adc6064420ad5e4bd619e",
+            //.path = "../testz",
+        },
+        // .mach_freetype = .{
+        //     .url = "https://github.com/hexops/mach-freetype/archive/dc4a5d8.tar.gz",
+        //     .hash = "122070070dd2c402d94c279d64d4a4d154691ad49f46fa2c24ed7c6e4e4f5c531477",
+        // },
+        // .ziglua = .{
+        //     // Use a tagged release of Ziglua tracking a stable Zig release
+        //     .url = "https://github.com/natecraddock/ziglua/archive/0f0f489.tar.gz",
+        //     .hash = "1220dbbecca0fe5811ea4da61cbc29868ddc34469c0817ea6f73a7e57d637288c2fe",
+        //     // .path = "libs/ziglua",
+        //     //.hash = ""
+        // },
+        // .zopengl = .{ .path = "libs/zig-gamedev/libs/zopengl" },
+        // .zmath = .{ .path = "libs/zig-gamedev/libs/zmath" },
+        // .zglfw = .{ .path = "libs/zig-gamedev/libs/zglfw" },
+        // // .zpool = .{ .path = "libs/zpool" },
+        // // .zjobs = .{ .path = "libs/zjobs" },
+        // // .zmesh = .{ .path = "libs/zmesh" },
+        // // .znoise = .{ .path = "libs/znoise" },
+        // .zstbi = .{ .path = "libs/zig-gamedev/libs/zstbi" },
+        // .common = .{ .path = "libs/zig-gamedev/libs/common" },
+        // // .zbullet = .{ .path = "libs/zbullet" },
+        // .zgui = .{ .path = "libs/zig-gamedev/libs/zgui" },
+        // .zgpu = .{ .path = "libs/zig-gamedev/libs/zgpu" },
+        // // .ztracy = .{ .path = "libs/ztracy" },
+        // // .zphysics = .{ .path = "libs/zphysics" },
+        // .zaudio = .{ .path = "libs/zig-gamedev/libs/zaudio" },
+        // .zflecs = .{ .path = "libs/zig-gamedev/libs/zflecs" },
+        // .system_sdk = .{ .path = "libs/zig-gamedev/libs/system-sdk" },
+    },
+}

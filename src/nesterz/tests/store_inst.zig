@@ -1,7 +1,7 @@
 const std = @import("std");
 const nes = @import("nesterz");
 const fix = @import("fixtures.zig");
-const testz = @import("./test_runner.zig");
+const testz = @import("testz");
 
 const CpuFlags = nes.CpuFlags;
 
