@@ -395,6 +395,7 @@ pub const Cpu6502 = struct {
                     self.takeBranch();
                 }
             },
+            // .BIT => {},
             .BMI => {
                 if(self.getFlag(.Negative)) {
                     self.takeBranch();
@@ -410,6 +411,9 @@ pub const Cpu6502 = struct {
                     self.takeBranch();
                 }
             },
+            .BRK => {},
+            .BVC => {},
+            .BVS => {},
             .CLC => {
                 self.setFlag(.Carry, false);
             },
@@ -483,6 +487,7 @@ pub const Cpu6502 = struct {
                 self.addrBus = self.internalAddr;
                 self.busState = .Read;
             },
+            // .JSR => {},
             .LDA => {
                 self.a = self.dataBus;
                 self.checkZeroFlag(self.a);
@@ -510,6 +515,14 @@ pub const Cpu6502 = struct {
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
             },
+            // .PHA => {},
+            // .PHP => {},
+            // .PLA => {},
+            // .PLP => {},
+            // .ROL => {},
+            // .ROR => {},
+            // .RTI => {},
+            // .RTS => {},
             .SBC => {
                 const subResult = subtract(self.a, @truncate(self.workingVal), self.getFlag(.Carry));
                 self.a = subResult.val;
@@ -542,6 +555,12 @@ pub const Cpu6502 = struct {
                 self.dataBus = self.y;
                 self.busState = ReadWriteState.Write;
             },
+            // .TAX => {},
+            // .TAY => {},
+            // .TSX => {},
+            // .TXA => {},
+            // .TXS => {},
+            // .TYA => {},
             else => {
                 @panic("Unhandled instruction!");
             }
