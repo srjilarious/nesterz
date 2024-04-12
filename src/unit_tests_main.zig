@@ -8,6 +8,7 @@ const SystemTests = testz.discoverTests(.{
     @import("nesterz/tests/adc_inst.zig"),
     @import("nesterz/tests/and_inst.zig"),
     @import("nesterz/tests/asl_inst.zig"),
+    @import("nesterz/tests/branch_tests.zig"),
     @import("nesterz/tests/cmp_inst.zig"),
     @import("nesterz/tests/cpx_inst.zig"),
     @import("nesterz/tests/cpy_inst.zig"),

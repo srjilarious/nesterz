@@ -330,7 +330,7 @@ pub const Cpu6502 = struct {
 
     fn takeBranch(self: *Cpu6502) void {
         const rel: i8 = @bitCast(@as(u8, @truncate(self.internalAddr)));
-        self.pc +%= @intCast(rel);
+        self.pc +%= @bitCast(@as(i16, rel));
         self.shouldFetch = false;
         self.cyclesLeft += 1;
     }
@@ -411,9 +411,17 @@ pub const Cpu6502 = struct {
                     self.takeBranch();
                 }
             },
-            .BRK => {},
-            .BVC => {},
-            .BVS => {},
+            // .BRK => {},
+            .BVC => {
+                if(!self.getFlag(.Carry)) {
+                    self.takeBranch();
+                }
+            },
+            .BVS => {
+                if(self.getFlag(.Carry)) {
+                    self.takeBranch();
+                }
+            },
             .CLC => {
                 self.setFlag(.Carry, false);
             },
