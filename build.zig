@@ -20,22 +20,17 @@ pub fn build(b: *std.Build) void {
         .name = "nesterz",
         // In this case the main source file is merely a path, however, in more
         // complicated build scripts, this could be a generated file.
-        .root_source_file = .{ .path = "src/unit_tests_main.zig" },
+        .root_source_file = b.path("src/unit_tests_main.zig"),
         .target = target,
         .optimize = optimize,
     });
 
-    const nesterz = b.addModule("nesterz", 
-        .{ 
-            .root_source_file = .{ 
-                .path = "src/nesterz/nesterz.zig" 
-        } 
+    const nesterz = b.addModule("nesterz", .{ 
+        .root_source_file = b.path("src/nesterz/nesterz.zig")
     });
 
     const nesasm = b.addModule("nesasm", .{
-        .root_source_file = .{ 
-                .path = "src/nesasm/nesterz.zig"
-        }
+        .root_source_file = b.path("src/nesasm/nesterz.zig")
     });
     nesasm.addImport("nesterz", nesterz);
 
@@ -73,7 +68,7 @@ pub fn build(b: *std.Build) void {
     // This creates a build step. It will be visible in the `zig build --help` menu,
     // and can be selected like this: `zig build run`
     // This will evaluate the `run` step rather than the default, which is "install".
-    const run_step = b.step("run", "Run the app");
+    const run_step = b.step("tests", "Run the tests");
     run_step.dependOn(&run_cmd.step);
 
     // Creates a step for unit testing. This only builds the test executable
