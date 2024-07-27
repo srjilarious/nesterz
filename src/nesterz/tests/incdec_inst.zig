@@ -90,16 +90,21 @@ pub fn dexTest() !void {
 
     try testz.expectEqual(tn.tickInstruction(), 2);
     try testz.expectEqual(tn.cpu.x, 1);
+    try testz.expectFalse(tn.cpu.getFlag(.Zero));
+    try testz.expectFalse(tn.cpu.getFlag(.Negative));
 
     try testz.expectEqual(tn.tickInstruction(), 2);
     try testz.expectEqual(tn.cpu.x, 0);
     try testz.expectTrue(tn.cpu.getFlag(.Zero));
+    try testz.expectFalse(tn.cpu.getFlag(.Negative));
 
     try testz.expectEqual(tn.tickInstruction(), 2);
     try testz.expectEqual(tn.cpu.x, 255);
+    try testz.expectFalse(tn.cpu.getFlag(.Zero));
     try testz.expectTrue(tn.cpu.getFlag(.Negative));
 
     try testz.expectEqual(tn.tickInstruction(), 2);
     try testz.expectEqual(tn.cpu.x, 254);
+    try testz.expectFalse(tn.cpu.getFlag(.Zero));
     try testz.expectTrue(tn.cpu.getFlag(.Negative));
 }
