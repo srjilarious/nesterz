@@ -413,12 +413,12 @@ pub const Cpu6502 = struct {
             },
             // .BRK => {},
             .BVC => {
-                if(!self.getFlag(.Carry)) {
+                if(!self.getFlag(.Overflow)) {
                     self.takeBranch();
                 }
             },
             .BVS => {
-                if(self.getFlag(.Carry)) {
+                if(self.getFlag(.Overflow)) {
                     self.takeBranch();
                 }
             },

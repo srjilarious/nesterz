@@ -276,10 +276,10 @@ pub const Instruction6502 = struct {
             // BRK - Force Interrupt
             0x00 => Instruction6502.init(opCode, CpuOp.BRK, AddressMode.Implied, 1, 7),
 
-            // BVC - Branch if Positive
+            // BVC - Branch if Overflow Clear
             0x50 => Instruction6502.init(opCode, CpuOp.BVC, AddressMode.Relative, 2, 2),
 
-            // BVS - Branch if Positive
+            // BVS - Branch if Overflow Set
             0x70 => Instruction6502.init(opCode, CpuOp.BVS, AddressMode.Relative, 2, 2),
 
             // CLC - Clear Carry Flag
