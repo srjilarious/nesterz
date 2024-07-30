@@ -122,8 +122,31 @@ pub fn skip_bcsTest() !void {
 
 }
 
-pub fn skip_bvcTest() !void {
+pub fn bvcTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator,
+    &[_]u8{
+        0x50, 0x12, // BVC #$12 -- fall through
+        0x50, 0x10, // BVC #$10 -- jump PC + 16 
+    });
+    defer tn.deinit();
 
+    // BVC 0x200 + 0x14 is 0x214 
+    // This instruction will jump back 22 
+    // (0xea is minus 0x14)
+    tn.writeBytes(0x214, &[_]u8{0x50, 0xea});
+
+    tn.cpu.setFlag(.Overflow, true);
+    // 2 since jump failed
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.pc, 0x203);
+
+    // 3 since jump needed
+    tn.cpu.setFlag(.Overflow, false);
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.cpu.pc, 0x215);
+
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.cpu.pc, 0x201);
 }
 
 pub fn bvsTest() !void {
@@ -134,7 +157,7 @@ pub fn bvsTest() !void {
     });
     defer tn.deinit();
 
-    // BEQ 0x200 + 0x14 is 0x214 
+    // BVS 0x200 + 0x14 is 0x214 
     // This instruction will jump back 22 
     // (0xea is minus 0x14)
     tn.writeBytes(0x214, &[_]u8{0x70, 0xea});
