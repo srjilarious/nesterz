@@ -108,3 +108,35 @@ pub fn dexTest() !void {
     try testz.expectFalse(tn.cpu.getFlag(.Zero));
     try testz.expectTrue(tn.cpu.getFlag(.Negative));
 }
+
+pub fn deyTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x88, // DEY
+        0x88, // DEY
+        0x88, // DEY
+        0x88, // DEY
+    });
+    defer tn.deinit();
+
+    tn.cpu.y = 2;
+
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.y, 1);
+    try testz.expectFalse(tn.cpu.getFlag(.Zero));
+    try testz.expectFalse(tn.cpu.getFlag(.Negative));
+
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.y, 0);
+    try testz.expectTrue(tn.cpu.getFlag(.Zero));
+    try testz.expectFalse(tn.cpu.getFlag(.Negative));
+
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.y, 255);
+    try testz.expectFalse(tn.cpu.getFlag(.Zero));
+    try testz.expectTrue(tn.cpu.getFlag(.Negative));
+
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.y, 254);
+    try testz.expectFalse(tn.cpu.getFlag(.Zero));
+    try testz.expectTrue(tn.cpu.getFlag(.Negative));
+}
