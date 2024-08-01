@@ -77,6 +77,38 @@ pub fn skip_decAbsoluteTest() !void {}
 
 pub fn skip_decAbsoluteXTest() !void {}
 
+pub fn inxTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0xE8, // INX
+        0xE8, // INX
+        0xE8, // INX
+        0xE8, // INX
+    });
+    defer tn.deinit();
+
+    tn.cpu.x = 253;
+
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.x, 254);
+    try testz.expectFalse(tn.cpu.getFlag(.Zero));
+    try testz.expectTrue(tn.cpu.getFlag(.Negative));
+
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.x, 255);
+    try testz.expectFalse(tn.cpu.getFlag(.Zero));
+    try testz.expectTrue(tn.cpu.getFlag(.Negative));
+
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.x, 0);
+    try testz.expectTrue(tn.cpu.getFlag(.Zero));
+    try testz.expectFalse(tn.cpu.getFlag(.Negative));
+
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.x, 1);
+    try testz.expectFalse(tn.cpu.getFlag(.Zero));
+    try testz.expectFalse(tn.cpu.getFlag(.Negative));
+}
+
 pub fn dexTest() !void {
     var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
         0xCA, // DEX
