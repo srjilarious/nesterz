@@ -114,8 +114,31 @@ pub fn bneTest() !void {
     try testz.expectEqual(tn.cpu.pc, 0x201);
 }
 
-pub fn skip_bccTest() !void {
+pub fn bccTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator,
+    &[_]u8{
+        0x90, 0x12, // BCC #$12 -- fall through
+        0x90, 0x10, // BCC #$10 -- jump PC + 16 
+    });
+    defer tn.deinit();
 
+    // BCC 0x200 + 0x14 is 0x214 
+    // This instruction will jump back 22 
+    // (0xea is minus 0x14)
+    tn.writeBytes(0x214, &[_]u8{0x90, 0xea});
+
+    tn.cpu.setFlag(.Carry, true);
+    // 2 since jump failed
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.pc, 0x203);
+
+    // 3 since jump needed
+    tn.cpu.setFlag(.Carry, false);
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.cpu.pc, 0x215);
+
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.cpu.pc, 0x201);
 }
 
 pub fn skip_bcsTest() !void {
