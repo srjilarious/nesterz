@@ -30,7 +30,7 @@ pub fn build(b: *std.Build) void {
     });
 
     const nesasm = b.addModule("nesasm", .{
-        .root_source_file = b.path("src/nesasm/nesterz.zig")
+        .root_source_file = b.path("src/nesasm/nesasm.zig")
     });
     nesasm.addImport("nesterz", nesterz);
 
@@ -40,7 +40,7 @@ pub fn build(b: *std.Build) void {
     });
 
     exe.root_module.addImport("nesterz", nesterz);
-    exe.root_module.addImport("nesasm", nesterz);
+    exe.root_module.addImport("nesasm", nesasm);
     exe.root_module.addImport("testz", testz.module("testz"));
 
     // This declares intent for the executable to be installed into the
