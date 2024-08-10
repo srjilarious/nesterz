@@ -122,6 +122,15 @@ pub const CpuOp = enum {
     XAS,
 };
 
+pub fn cpuOpFromStr(opStr: []const u8) ?CpuOp {
+    inline for(std.meta.fields(CpuOp)) |f| {
+        if(std.ascii.eqlIgnoreCase(opStr, f.name)) {
+            return @as(CpuOp, @enumFromInt(f.value));
+        }
+    }
+    return null;
+}
+
 pub fn isStore(op: CpuOp) bool {
     return switch (op) {
         CpuOp.STA => true,

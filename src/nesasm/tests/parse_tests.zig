@@ -15,3 +15,10 @@ pub fn removeCommentTests() !void {
     const comment2 = nesasm.utils.removeComment(";   CDC ; my comment");
     try testz.expectEqualStr(comment2, "");
 }
+
+// pub fn parseLineTokensTest() !void {
+//     var tokens = std.mem.tokenize(u8, "   CDC $10", " \t");
+//     while (tokens.next()) |token| {
+//         std.debug.print("'{s}', ", .{token});
+//     }
+// }
