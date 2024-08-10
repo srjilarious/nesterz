@@ -2,6 +2,7 @@
 const std = @import("std");
 const nes = @import("nesterz");
 const structs = @import("./structs.zig");
+const utils = @import("./utils.zig");
 
 const CpuOp = nes.CpuOp;
 const AddressMode = nes.AddressMode;
@@ -39,5 +40,29 @@ pub const Assembler6502 = struct {
         self.labels.deinit();
         self.symbols.deinit();
         self.lines.deinit();
+    }
+
+    pub fn parseLine(self: *Assembler6502, line: []const u8) !?AssemblyLine {
+        const commentRemovedLine = utils.removeComment(line);
+        var tokens = std.mem.tokenize(u8, commentRemovedLine, " \t");
+        
+        const cmdTok = tokens.next();
+        if(cmdTok == null) return null;
+
+        if(std.ascii.eqlIgnoreCase("define", cmdTok.?)) {
+            std.debug.print("{}: Got define!\n", .{self.currLineNo});
+        }
+
+        const op = nes.emu.cpuOpFromStr(cmdTok.?);
+        if(op == null) {
+            std.debug.print("{}: ERROR: Got bad instruction: {s}\n", .{self.currLineNo, cmdTok.?});
+        }
+
+        return AssemblyLine{
+            .instr = .{ .op = op.?, .addrMode = AddressMode.Implied, .operand = null },
+            .label = null,
+            .comment = null,
+            .lineNo = self.currLineNo
+        };
     }
 };

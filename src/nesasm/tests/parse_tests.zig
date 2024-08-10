@@ -1,5 +1,6 @@
 const std = @import("std");
 const nesasm = @import("nesasm");
+const nes = @import("nesterz");
 const testz = @import("testz");
 
 pub fn removeCommentTests() !void {
@@ -14,6 +15,16 @@ pub fn removeCommentTests() !void {
 
     const comment2 = nesasm.utils.removeComment(";   CDC ; my comment");
     try testz.expectEqualStr(comment2, "");
+}
+
+pub fn checkAdcAssembleParse() !void {
+    var assembler = try nesasm.Assembler6502.init(std.heap.page_allocator);
+    const alOpt = try assembler.parseLine("  ADC $10 ; Testing");
+
+    try testz.expectNotEqual(alOpt, null);
+    const al = alOpt.?;
+
+    try testz.expectEqual(al.instr.?.op, nes.CpuOp.ADC);
 }
 
 // pub fn parseLineTokensTest() !void {
