@@ -76,3 +76,15 @@ pub fn skip_staAbsoluteYTest() !void {}
 pub fn skip_staIndirectXTest() !void {}
 
 pub fn skip_staIndirectYTest() !void {}
+
+// STX tets
+//
+pub fn skip_stxZeroPageTest() !void {}
+pub fn skip_stxZeroPageYTest() !void {}
+pub fn skip_stxAbsoluteTest() !void {}
+
+// STY tets
+//
+pub fn skip_styZeroPageTest() !void {}
+pub fn skip_styZeroPageYTest() !void {}
+pub fn skip_styAbsoluteTest() !void {}

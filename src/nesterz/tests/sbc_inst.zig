@@ -54,3 +54,15 @@ pub fn sbcZeroPageTest() !void {
     try testz.expectEqual(tn.cpu.a, 127);
     try testz.expectEqual(tn.cpu.getFlag(.Overflow), false);
 }
+
+pub fn skip_sbcZeroPageXTest() !void {}
+
+pub fn skip_sbcAbsoluteTest() !void {}
+
+pub fn skip_sbcAbsoluteXTest() !void {}
+
+pub fn skip_sbcAbsoluteYTest() !void {}
+
+pub fn skip_sbcIndirectXTest() !void {}
+
+pub fn skip_sbcIndirectYTest() !void {}

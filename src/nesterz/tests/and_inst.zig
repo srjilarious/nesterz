@@ -174,6 +174,8 @@ pub fn andAbsoluteXTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 }
 
+pub fn skip_andAbsoluteYTest() !void {}
+
 pub fn skip_andIndirectXTest() !void {}
 
 pub fn skip_andIndirectYTest() !void {}

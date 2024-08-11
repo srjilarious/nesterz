@@ -117,3 +117,7 @@ pub fn lsrZeroPageXTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
 }
+
+pub fn skip_lsrAsoluteTest() !void {}
+
+pub fn skip_lsrAsoluteXTest() !void {}

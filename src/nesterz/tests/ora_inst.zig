@@ -105,3 +105,13 @@ pub fn oraZeroPageXTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
 }
+
+pub fn skip_oraAbsoluteTest() !void {}
+
+pub fn skip_oraAbsoluteXTest() !void {}
+
+pub fn skip_oraAbsoluteYTest() !void {}
+
+pub fn skip_oraIndirectXTest() !void {}
+
+pub fn skip_oraIndirectYTest() !void {}
