@@ -470,8 +470,8 @@ pub const Cpu6502 = struct {
             },
             .EOR => {
                 self.a = self.a ^ @as(u8, @truncate(self.workingVal));
-                self.checkZeroFlag(@truncate(self.workingVal));
-                self.checkNegativeFlag(@truncate(self.workingVal));
+                self.checkZeroFlag(self.a);
+                self.checkNegativeFlag(self.a);
             },
             .INC => {
                 const wv : u8 = @truncate(self.workingVal);

@@ -223,4 +223,15 @@ pub fn bvsTest() !void {
     try testz.expectEqual(tn.cpu.pc, 0x201);
 }
 
+pub fn skip_jmpTest() !void {
+
+}
+
+pub fn skip_jsrTest() !void {
+
+}
+
+pub fn skip_interruptTest() !void {
+
+}
 

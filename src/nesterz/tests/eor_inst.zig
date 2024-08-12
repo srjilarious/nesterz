@@ -5,7 +5,31 @@ const testz = @import("testz");
 
 const CpuFlags = nes.CpuFlags;
 
-pub fn skip_eorImmediateTest() !void {}
+pub fn eorImmediateTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x49, 0xaa, // EOR #$AA
+        0x49, 0x22, // EOR #$22
+        0x49, 0xf5, // EOR #$F5
+    });
+    defer tn.deinit();
+
+    tn.cpu.a = 0x88;
+
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.a, 0x22);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.a, 0x0);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.a, 0xf5);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+}
 
 pub fn skip_eorZeroPageTest() !void {}
 
