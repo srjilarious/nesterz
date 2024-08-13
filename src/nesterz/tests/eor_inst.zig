@@ -31,7 +31,32 @@ pub fn eorImmediateTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
 }
 
-pub fn skip_eorZeroPageTest() !void {}
+pub fn eorZeroPageTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x45, 0x10, // EOR $10 ($AA)
+        0x45, 0x11, // EOR $11 ($22)
+        0x45, 0x12, // EOR $12 ($F5)
+    });
+    defer tn.deinit();
+
+    tn.writeBytes(0x10, &[_]u8{ 0xaa, 0x22, 0xf5 });
+    tn.cpu.a = 0x88;
+
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.cpu.a, 0x22);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.cpu.a, 0x0);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.cpu.a, 0xf5);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+}
 
 pub fn skip_eorZeroPageXTest() !void {}
 
