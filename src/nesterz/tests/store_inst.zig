@@ -99,7 +99,27 @@ pub fn skip_staIndirectYTest() !void {}
 
 // STX tets
 //
-pub fn skip_stxZeroPageTest() !void {}
+pub fn stxZeroPageTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x86, 0x10, // STX $10
+        0x86, 0xff, // STX $ff
+        0x86, 0x0, // STX 0
+    });
+    defer tn.deinit();
+
+    tn.cpu.x = 23;
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.readByte(0x10), 23);
+
+    tn.cpu.x = 0xaa;
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.readByte(0xff), 0xaa);
+
+    tn.cpu.x = 0xcd;
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.readByte(0x0), 0xcd);
+}
+
 pub fn skip_stxZeroPageYTest() !void {}
 pub fn skip_stxAbsoluteTest() !void {}
 
