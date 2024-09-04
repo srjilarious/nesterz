@@ -120,7 +120,28 @@ pub fn stxZeroPageTest() !void {
     try testz.expectEqual(tn.readByte(0x0), 0xcd);
 }
 
-pub fn skip_stxZeroPageYTest() !void {}
+pub fn stxZeroPageYTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x96, 0x10, // STX $10,Y
+        0x96, 0xff, // STX $ff,Y
+        0x96, 0x0, // STX 0,Y
+    });
+    defer tn.deinit();
+
+    tn.cpu.y = 0x10;
+    tn.cpu.x = 23;
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.readByte(0x20), 23);
+
+    tn.cpu.x = 0xaa;
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.readByte(0x0f), 0xaa);
+
+    tn.cpu.x = 0xcd;
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.readByte(0x10), 0xcd);
+}
+
 pub fn skip_stxAbsoluteTest() !void {}
 
 // STY tets
