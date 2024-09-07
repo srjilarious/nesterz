@@ -108,7 +108,32 @@ pub fn sbcAbsoluteTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(.Overflow), false);
 }
 
-pub fn skip_sbcAbsoluteXTest() !void {}
+pub fn sbcAbsoluteXTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0xFD, 0x10, 0x30, // SBC $3010,X
+        0xFD, 0x11, 0x30, // SBC $3011,X
+    });
+    defer tn.deinit();
+
+    tn.writeBytes(0x3015, &[_]u8{ 0x10, 0x1 });
+
+    // Start with the overflow flag set.
+    tn.cpu.setFlag(.Carry, true);
+    tn.cpu.a = 0x3;
+    tn.cpu.x = 0x5;
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    const res: i8 = -13;
+    try testz.expectEqual(tn.cpu.a, @as(u8, @bitCast(res)));
+    try testz.expectEqual(tn.cpu.getFlag(.Overflow), true);
+
+    tn.cpu.setFlag(.Carry, true);
+    const res2: i8 = -128;
+    tn.cpu.a = @as(u8, @bitCast(res2));
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.a, 127);
+    try testz.expectEqual(tn.cpu.getFlag(.Overflow), false);
+}
 
 pub fn skip_sbcAbsoluteYTest() !void {}
 
