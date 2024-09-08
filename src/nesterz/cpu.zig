@@ -527,7 +527,13 @@ pub const Cpu6502 = struct {
             // .PHP => {},
             // .PLA => {},
             // .PLP => {},
-            // .ROL => {},
+            .ROL => {
+                const temp: u8 = @intFromBool(self.getFlag(.Carry));
+                self.setFlag(.Carry, (self.workingVal & 0x80) != 0);
+                self.workingVal = ((self.workingVal << 1) & 0xFF | temp);
+                self.setFlag(.Negative, (self.workingVal & 0x80) != 0);
+                self.setFlag(.Zero, self.workingVal == 0);
+            },
             // .ROR => {},
             // .RTI => {},
             // .RTS => {},
