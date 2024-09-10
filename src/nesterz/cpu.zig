@@ -287,9 +287,50 @@ pub const Cpu6502 = struct {
                     self.internalAddr = @intCast(self.dataBus);
                 }
             },
-            // .Indirect => {
-            //     
-            // },
+            .Indirect => {
+                if(self.currCycle == 1) {
+                    self.internalAddr = @intCast(self.dataBus);
+                }
+                else if(self.currCycle == 2) {
+                    self.internalAddr = ((@as(u16, @intCast(self.dataBus)) << 8)) | self.internalAddr;
+                    self.addrBus = self.internalAddr;
+                    self.shouldFetch = false;
+                    self.busState = .Read;
+                }
+                else if(self.currCycle == 3) {
+                    self.workingVal = @intCast(self.dataBus);
+                    self.addrBus +%= 1;
+                    self.shouldFetch = false;
+                    self.busState = .Read;
+                }
+                else if(self.currCycle == 4) {
+                    self.internalAddr = ((@as(u16, @intCast(self.dataBus)) << 8)) | self.workingVal;
+                }
+            },
+            .IndirectX => {
+                if(self.currCycle == 1) {
+                    const lower = self.dataBus +% self.x;
+                    self.addrBus = @intCast(lower);
+                    self.shouldFetch = false;
+                    self.busState = .Read;
+                }
+                else if(self.currCycle == 2) {
+                    self.internalAddr = @intCast(self.dataBus);
+                    self.addrBus +%= 1;
+                    self.shouldFetch = false;
+                    self.busState = .Read;
+                }
+                else if(self.currCycle == 3) {
+                    self.internalAddr = ((@as(u16, @intCast(self.dataBus)) << 8)) | self.internalAddr;
+                    self.addrBus = self.internalAddr;
+                    self.shouldFetch = false;
+                    self.busState = .Read;
+                }
+                else if(self.currCycle == 4) {
+                    self.workingVal = @intCast(self.dataBus);
+                    self.shouldFetch = false;
+                }
+            },
             else => {
                 @panic("Unimplemented address mode!");
             },
