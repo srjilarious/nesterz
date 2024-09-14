@@ -175,7 +175,40 @@ pub fn oraAbsoluteXTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
 }
 
-pub fn skip_oraAbsoluteYTest() !void {}
+pub fn oraAbsoluteYTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x19, 0x10, 0x30, // ORA $3010,Y
+        0x19, 0x11, 0x30, // ORA $3011,Y
+        0x19, 0x12, 0x30, // ORA $3012,Y
+        0x19, 0x13, 0x30, // ORA $3013,Y
+    });
+    defer tn.deinit();
+
+    tn.writeBytes(0x3015, &[_]u8{ 0x0, 0x44, 0x22, 0x81 });
+    tn.cpu.y = 5;
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.a, 0x0);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    tn.cpu.a = 0x10;
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.a, 0x54);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.a, 0x76);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.a, 0x0f7);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+}
 
 pub fn skip_oraIndirectXTest() !void {}
 
