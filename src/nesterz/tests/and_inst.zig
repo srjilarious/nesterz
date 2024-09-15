@@ -211,9 +211,9 @@ pub fn andAbsoluteYTest() !void {
 
 pub fn andIndirectXTest() !void {
     var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
-        0x21, 0x10, // AND ($10),X
-        0x21, 0x12, // AND ($12),X
-        0x21, 0x14, // AND ($14),X
+        0x21, 0x10, // AND ($10,X)
+        0x21, 0x12, // AND ($12,X)
+        0x21, 0x14, // AND ($14,X)
     });
     defer tn.deinit();
 
