@@ -1,0 +1,32 @@
+const std = @import("std");
+const nes = @import("nesterz");
+const fix = @import("fixtures.zig");
+const testz = @import("testz");
+
+const CpuFlags = nes.CpuFlags;
+
+pub fn skip_bitZeroPageTest() !void {
+    // var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+    //     0xE9, 0x10, // SBC #$10
+    //     0xE9, 0x1, // SBC #$1
+    // });
+    // defer tn.deinit();
+    //
+    // // Start with the overflow flag set.
+    // tn.cpu.setFlag(.Carry, true);
+    // tn.cpu.a = 0x3;
+    //
+    // try testz.expectEqual(tn.tickInstruction(), 2);
+    // const res: i8 = -13;
+    // try testz.expectEqual(tn.cpu.a, @as(u8, @bitCast(res)));
+    // try testz.expectEqual(tn.cpu.getFlag(.Overflow), true);
+    //
+    // tn.cpu.setFlag(.Carry, true);
+    // const res2: i8 = -128;
+    // tn.cpu.a = @as(u8, @bitCast(res2));
+    // try testz.expectEqual(tn.tickInstruction(), 2);
+    // try testz.expectEqual(tn.cpu.a, 127);
+    // try testz.expectEqual(tn.cpu.getFlag(.Overflow), false);
+}
+
+pub fn skip_bitAbsoluteTest() !void {}

@@ -38,6 +38,12 @@ pub fn incZeroPageTest() !void {
     //try testz.expectEqual(120, 0xff);
 }
 
+pub fn skip_incZeroPageXTest() !void {}
+
+pub fn skip_incAbsoluteTest() !void {}
+
+pub fn skip_incAbsoluteXTest() !void {}
+
 pub fn decZeroPageTest() !void {
     var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
         0xC6, 0x10, // DEC $10
@@ -88,7 +94,7 @@ pub fn decZeroPageXTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 
-    try testz.expectEqual(tn.tickInstruction(),6);
+    try testz.expectEqual(tn.tickInstruction(), 6);
     try testz.expectEqual(tn.readByte(0x16), 0xff);
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
