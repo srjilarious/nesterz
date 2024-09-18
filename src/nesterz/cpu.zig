@@ -575,7 +575,13 @@ pub const Cpu6502 = struct {
                 self.setFlag(.Negative, (self.workingVal & 0x80) != 0);
                 self.setFlag(.Zero, self.workingVal == 0);
             },
-            // .ROR => {},
+            .ROR => {
+                const temp: u16 = @as(u16, @intFromBool(self.getFlag(.Carry))) << 7;
+                self.setFlag(.Carry, (self.workingVal & 0x01) != 0);
+                self.workingVal = (temp | (self.workingVal >> 1)) & 0xFF;
+                self.setFlag(.Negative, (self.workingVal & 0x80) != 0);
+                self.setFlag(.Zero, self.workingVal == 0);
+            },
             // .RTI => {},
             // .RTS => {},
             .SBC => {

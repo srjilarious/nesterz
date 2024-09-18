@@ -13,7 +13,7 @@ pub fn rolAccumulatorTest() !void {
     });
     defer tn.deinit();
 
-    tn.cpu.a = 0xAd;
+    tn.cpu.a = 0xAD;
 
     try testz.expectEqual(tn.tickInstruction(), 2);
     try testz.expectEqual(tn.cpu.a, 0x5a);
