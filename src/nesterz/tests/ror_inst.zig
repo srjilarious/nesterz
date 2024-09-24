@@ -13,7 +13,7 @@ pub fn rorAccumulatorTest() !void {
     });
     defer tn.deinit();
 
-    tn.cpu.a = 0xAd;
+    tn.cpu.a = 0xAD;
 
     try testz.expectEqual(tn.tickInstruction(), 2);
     try testz.expectEqual(tn.cpu.a, 0x56);
@@ -43,7 +43,6 @@ pub fn rorZeroPageTest() !void {
     defer tn.deinit();
 
     tn.writeByte(0x50, 0xAD);
-    tn.cpu.a = 0xAD;
 
     try testz.expectEqual(tn.tickInstruction(), 5);
     try testz.expectEqual(tn.readByte(0x50), 0x56);
@@ -64,7 +63,35 @@ pub fn rorZeroPageTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 }
 
-pub fn skip_rorZeroPageXTest() !void {}
+pub fn rorZeroPageXTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x76, 0x50, // ROR $50,X
+        0x76, 0x50, // ROR $50,X
+        0x76, 0x50, // ROR $50,X
+    });
+    defer tn.deinit();
+
+    tn.writeByte(0x5A, 0xAD);
+    tn.cpu.x = 0xA;
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x5A), 0x56);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x5A), 0xAB);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x5A), 0x55);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+}
 
 pub fn skip_rorAbsoluteTest() !void {}
 
