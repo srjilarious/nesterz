@@ -91,7 +91,27 @@ pub fn staAbsoluteXTest() !void {
     try testz.expectEqual(tn.readByte(0x3005), 0xcd);
 }
 
-pub fn skip_staAbsoluteYTest() !void {}
+pub fn staAbsoluteYTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x99, 0x10, 0x30, // STA $3010,Y
+        0x99, 0x15, 0x30, // STA $3015,Y
+        0x99, 0x0, 0x30, // STA $3000,Y
+    });
+    defer tn.deinit();
+
+    tn.cpu.a = 23;
+    tn.cpu.y = 5;
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.readByte(0x3015), 23);
+
+    tn.cpu.a = 0xaa;
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.readByte(0x301a), 0xaa);
+
+    tn.cpu.a = 0xcd;
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.readByte(0x3005), 0xcd);
+}
 
 pub fn skip_staIndirectXTest() !void {}
 
