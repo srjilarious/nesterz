@@ -616,12 +616,24 @@ pub const Cpu6502 = struct {
                 self.dataBus = self.y;
                 self.busState = ReadWriteState.Write;
             },
-            // .TAX => {},
-            // .TAY => {},
-            // .TSX => {},
-            // .TXA => {},
-            // .TXS => {},
-            // .TYA => {},
+            .TAX => {
+                self.x = self.a;
+            },
+            .TAY => {
+                self.y = self.a;
+            },
+            .TSX => {
+                self.x = self.sp;
+            },
+            .TXA => {
+                self.a = self.x;
+            },
+            .TXS => {
+                self.sp = self.x;
+            },
+            .TYA => {
+                self.a = self.y;
+            },
             else => {
                 @panic("Unhandled instruction!");
             }
