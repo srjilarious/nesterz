@@ -35,5 +35,33 @@ pub fn transferXTest() !void {
     try testz.expectEqual(tn.cpu.x, 0x0);
 }
 
-pub fn skip_transferYTest() !void {}
+pub fn transferYTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0xA8, // TAY
+        0x98, // TYA
+        0xA8, // TAY
+        0x98, // TYA
+    });
+    defer tn.deinit();
+
+    tn.cpu.a = 0x10;
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.a, 0x10);
+    try testz.expectEqual(tn.cpu.y, 0x10);
+
+    tn.cpu.y = 0x50;
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.a, 0x50);
+    try testz.expectEqual(tn.cpu.y, 0x50);
+
+    tn.cpu.a = 0xff;
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.a, 0xff);
+    try testz.expectEqual(tn.cpu.y, 0xff);
+
+    tn.cpu.y = 0x0;
+    try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectEqual(tn.cpu.a, 0x0);
+    try testz.expectEqual(tn.cpu.y, 0x0);
+}
 pub fn skip_transferSPTest() !void {}
