@@ -118,6 +118,41 @@ pub fn lsrZeroPageXTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
 }
 
-pub fn skip_lsrAsoluteTest() !void {}
+pub fn lsrAsoluteTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x4E, 0x10, 0x30, // LSR $3010
+        0x4E, 0x10, 0x30, // LSR $3010
+        0x4E, 0x10, 0x30, // LSR $3010
+        0x4E, 0x10, 0x30, // LSR $3010
+    });
+    defer tn.deinit();
+
+    tn.writeByte(0x3010, 0xa5);
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x3010), 0x52);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x3010), 0x29);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), false);
+
+    tn.cpu.setFlag(CpuFlags.Carry, true);
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x3010), 0x14);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
+
+    tn.writeByte(0x3010, 0x1);
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x3010), 0x00);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Carry), true);
+}
 
 pub fn skip_lsrAsoluteXTest() !void {}
