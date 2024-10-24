@@ -105,10 +105,10 @@ pub fn incAbsoluteTest() !void {
 
 pub fn incAbsoluteXTest() !void {
     var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
-        0xFE, 0x10, 0x30, // INC $3010
-        0xFE, 0x11, 0x30, // INC $3011
-        0xFE, 0x12, 0x30, // INC $3012
-        0xFE, 0x10, 0x30, // INC $3010
+        0xFE, 0x10, 0x30, // INC $3010,X
+        0xFE, 0x11, 0x30, // INC $3011,X
+        0xFE, 0x12, 0x30, // INC $3012,X
+        0xFE, 0x10, 0x30, // INC $3010,X
     });
     defer tn.deinit();
 
@@ -234,7 +234,38 @@ pub fn decAbsoluteTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 }
 
-pub fn skip_decAbsoluteXTest() !void {}
+pub fn decAbsoluteXTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0xDE, 0x10, 0x30, // DEC $3010,X
+        0xDE, 0x11, 0x30, // DEC $3011,X
+        0xDE, 0x12, 0x30, // DEC $3012,X
+        0xDE, 0x10, 0x30, // DEC $3010,X
+    });
+    defer tn.deinit();
+
+    tn.writeBytes(0x301A, &[_]u8{ 30, 0x0, 0x1 });
+    tn.cpu.x = 0xA;
+
+    try testz.expectEqual(tn.tickInstruction(), 7);
+    try testz.expectEqual(tn.readByte(0x301A), 29);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 7);
+    try testz.expectEqual(tn.readByte(0x301B), 0xff);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+
+    try testz.expectEqual(tn.tickInstruction(), 7);
+    try testz.expectEqual(tn.readByte(0x301C), 0x0);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 7);
+    try testz.expectEqual(tn.readByte(0x301A), 28);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+}
 
 pub fn inxTest() !void {
     var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
