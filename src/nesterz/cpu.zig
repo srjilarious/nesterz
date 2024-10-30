@@ -436,7 +436,13 @@ pub const Cpu6502 = struct {
                     self.takeBranch();
                 }
             },
-            // .BIT => {},
+            .BIT => {
+                const workingU8: u8 = @as(u8, @truncate(self.workingVal));
+                const tempVal: u8 = self.a & workingU8;
+                self.checkZeroFlag(tempVal);
+                self.checkNegativeFlag(workingU8);
+                self.setFlag(.Overflow, (self.workingVal & 0x40) != 0);
+            },
             .BMI => {
                 if(self.getFlag(.Negative)) {
                     self.takeBranch();

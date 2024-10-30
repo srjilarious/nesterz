@@ -5,28 +5,41 @@ const testz = @import("testz");
 
 const CpuFlags = nes.CpuFlags;
 
-pub fn skip_bitZeroPageTest() !void {
-    // var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
-    //     0xE9, 0x10, // SBC #$10
-    //     0xE9, 0x1, // SBC #$1
-    // });
-    // defer tn.deinit();
+pub fn bitZeroPageTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x24, 0x10, // BIT $10
+        // 0x24, 0x11, // BIT $11
+        // 0x24, 0x12, // AND $12
+        // 0x25, 0x13, // AND $13
+    });
+    defer tn.deinit();
+
+    tn.writeBytes(0x10, &[_]u8{ 0xaa, 0xab, 0x22, 0x0 });
+
+    tn.cpu.a = 0xff;
+    tn.cpu.setFlag(.Negative, false);
+    tn.cpu.setFlag(.Overflow, true);
+
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.cpu.a, 0xff);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Overflow), false);
+
+    // try testz.expectEqual(tn.tickInstruction(), 3);
+    // try testz.expectEqual(tn.cpu.a, 0xab);
+    // try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    // try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
     //
-    // // Start with the overflow flag set.
-    // tn.cpu.setFlag(.Carry, true);
-    // tn.cpu.a = 0x3;
+    // try testz.expectEqual(tn.tickInstruction(), 3);
+    // try testz.expectEqual(tn.cpu.a, 0x22);
+    // try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    // try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
     //
-    // try testz.expectEqual(tn.tickInstruction(), 2);
-    // const res: i8 = -13;
-    // try testz.expectEqual(tn.cpu.a, @as(u8, @bitCast(res)));
-    // try testz.expectEqual(tn.cpu.getFlag(.Overflow), true);
-    //
-    // tn.cpu.setFlag(.Carry, true);
-    // const res2: i8 = -128;
-    // tn.cpu.a = @as(u8, @bitCast(res2));
-    // try testz.expectEqual(tn.tickInstruction(), 2);
-    // try testz.expectEqual(tn.cpu.a, 127);
-    // try testz.expectEqual(tn.cpu.getFlag(.Overflow), false);
+    // try testz.expectEqual(tn.tickInstruction(), 3);
+    // try testz.expectEqual(tn.cpu.a, 0x0);
+    // try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    // try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 }
 
 pub fn skip_bitAbsoluteTest() !void {}
