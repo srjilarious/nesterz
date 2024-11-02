@@ -27,6 +27,14 @@ pub fn checkAdcAssembleParse() !void {
     try testz.expectEqual(al.instr.?.op, nes.CpuOp.ADC);
 }
 
+pub fn checkOperandParsing() !void {
+    const val = try nesasm.assembler.parseOperand("$ff");
+    try testz.expectEqual(val.byte, 0xff);
+
+    const word = try nesasm.assembler.parseOperand("$3a10");
+    try testz.expectEqual(word.word, 0x3a10);
+}
+
 // pub fn parseLineTokensTest() !void {
 //     var tokens = std.mem.tokenize(u8, "   CDC $10", " \t");
 //     while (tokens.next()) |token| {

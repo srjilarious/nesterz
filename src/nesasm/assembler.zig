@@ -15,6 +15,29 @@ const AssemblyLine = structs.AssemblyLine;
 const AssemblyError = structs.AssemblyError;
 const AssemblyParseError = structs.AssemblyParseError;
 
+const AddrOp = struct {
+    addr: AddressMode,
+    operand: ?Operand
+};
+
+pub fn parseOperand(opStr: []const u8) !Operand {
+    // Should not get a zero length string.
+    std.debug.assert(opStr.len != 0);
+
+    if(opStr[0] == '$') {
+        const parsed = try std.fmt.parseInt(u16, opStr[1..], 16);
+        switch(parsed) {
+            0...0xff => {
+                return .{ .byte = @as(u8, @truncate(parsed)) };
+            },
+            else => {
+                return .{ .word = parsed };
+            }
+        }
+    }
+    return error.NoIdea;
+}
+
 pub const Assembler6502 = struct {
     alloc: std.mem.Allocator,
     labels: std.ArrayList(Label),
@@ -42,9 +65,24 @@ pub const Assembler6502 = struct {
         self.lines.deinit();
     }
 
+    // fn parseOperand()
+    fn parseAddrAndOperand(_: *Assembler6502, op: CpuOp, tokens: std.mem.TokenIterator(u8, .any)) !?AddrOp {
+        const s = tokens.next();
+        if(s == null) {
+            return .{
+                .addr = .Implied,
+                .operand = null
+            };
+        }
+
+        if(nes.isRelativeBranch(op)) {
+            //self.parseOperand(s.?);
+        }
+    }
+
     pub fn parseLine(self: *Assembler6502, line: []const u8) !?AssemblyLine {
         const commentRemovedLine = utils.removeComment(line);
-        var tokens = std.mem.tokenize(u8, commentRemovedLine, " \t");
+        var tokens = std.mem.tokenizeAny(u8, commentRemovedLine, " \t");
         
         const cmdTok = tokens.next();
         if(cmdTok == null) return null;
