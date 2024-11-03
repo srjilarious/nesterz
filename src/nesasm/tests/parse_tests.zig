@@ -54,6 +54,25 @@ pub fn checkOperandParsing_u8() !void {
     try testz.expectEqual(val.byte, 0x7f);
 }
 
+pub fn checkOperandParsing_u16() !void {
+    var val = try nesasm.assembler.parseOperand("-129");
+    try testz.expectEqual(val.word, 0xff7f);
+    try testz.expectEqual(@as(i16, @bitCast(val.word)), -129);
+
+    val = try nesasm.assembler.parseOperand("-32768");
+    try testz.expectEqual(val.word, 0x8000);
+    try testz.expectEqual(@as(i16, @bitCast(val.word)), -32768);
+
+    val = try nesasm.assembler.parseOperand("65535");
+    try testz.expectEqual(val.word, 0xffff);
+
+    val = try nesasm.assembler.parseOperand("32767");
+    try testz.expectEqual(val.word, 0x7fff);
+
+    val = try nesasm.assembler.parseOperand("256");
+    try testz.expectEqual(val.word, 0x100);
+}
+
 // pub fn parseLineTokensTest() !void {
 //     var tokens = std.mem.tokenize(u8, "   CDC $10", " \t");
 //     while (tokens.next()) |token| {
