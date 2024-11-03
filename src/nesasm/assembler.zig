@@ -24,14 +24,37 @@ pub fn parseOperand(opStr: []const u8) !Operand {
     // Should not get a zero length string.
     std.debug.assert(opStr.len != 0);
 
-    if(opStr[0] == '$') {
-        const parsed = try std.fmt.parseInt(u16, opStr[1..], 16);
-        switch(parsed) {
-            0...0xff => {
-                return .{ .byte = @as(u8, @truncate(parsed)) };
-            },
-            else => {
-                return .{ .word = parsed };
+    switch(opStr[0])
+    {
+        '$' => {
+            const parsed = try std.fmt.parseInt(u16, opStr[1..], 16);
+            switch(parsed) {
+                0...0xff => {
+                    return .{ .byte = @as(u8, @truncate(parsed)) };
+                },
+                else => {
+                    return .{ .word = parsed };
+                }
+            }
+        },
+        'a'...'z', 'A'...'Z' => {
+            // Handle symbol.
+        },
+        else => {
+            const parsed = try std.fmt.parseInt(i32, opStr, 10);
+            const val = @as(u32, @bitCast(parsed));
+            switch(parsed) {
+                -32768...-129 => {
+                    return .{ .word = @as(u16, @truncate(val))};
+                },
+                -128...-1 => {
+                    return .{ .byte = @as(u8, @truncate(val))};
+                },
+                0...0xff => {
+                    return .{ .byte = @as(u8, @truncate(val)) };
+                },
+                0x100...65535 => return .{ .word = @as(u16, @truncate(val)) },
+                else => return error.OperandTooBig,
             }
         }
     }

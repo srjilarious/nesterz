@@ -27,12 +27,31 @@ pub fn checkAdcAssembleParse() !void {
     try testz.expectEqual(al.instr.?.op, nes.CpuOp.ADC);
 }
 
-pub fn checkOperandParsing() !void {
+pub fn checkOperandParsingHex() !void {
     const val = try nesasm.assembler.parseOperand("$ff");
     try testz.expectEqual(val.byte, 0xff);
 
     const word = try nesasm.assembler.parseOperand("$3a10");
     try testz.expectEqual(word.word, 0x3a10);
+}
+
+pub fn checkOperandParsing_u8() !void {
+    var val = try nesasm.assembler.parseOperand("0");
+    try testz.expectEqual(val.byte, 0);
+
+    val = try nesasm.assembler.parseOperand("-1");
+    try testz.expectEqual(val.byte, 0xff);
+    try testz.expectEqual(@as(i8, @bitCast(val.byte)), -1);
+
+    val = try nesasm.assembler.parseOperand("-128");
+    try testz.expectEqual(val.byte, 0x80);
+    try testz.expectEqual(@as(i8, @bitCast(val.byte)), -128);
+
+    val = try nesasm.assembler.parseOperand("255");
+    try testz.expectEqual(val.byte, 0xff);
+
+    val = try nesasm.assembler.parseOperand("127");
+    try testz.expectEqual(val.byte, 0x7f);
 }
 
 // pub fn parseLineTokensTest() !void {
