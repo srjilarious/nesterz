@@ -10,3 +10,5 @@ pub const CpuOp = emu.CpuOp;
 pub const AddressMode = emu.AddressMode;
 pub const CpuFlags = emu.CpuFlags;
 pub const Cpu6502 = cpu.Cpu6502;
+
+pub const isRelativeBranch = emu.isRelativeBranch;

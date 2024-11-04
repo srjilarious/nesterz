@@ -61,6 +61,33 @@ pub fn parseOperand(opStr: []const u8) !Operand {
     return error.NoIdea;
 }
 
+pub fn parseAddrAndOperand(op: CpuOp, tokens: *std.mem.TokenIterator(u8, .any)) !?AddrOp {
+    const s = tokens.next();
+    if(s == null) {
+        return .{
+            .addr = .Implied,
+            .operand = null
+        };
+    }
+
+    std.debug.assert(s.?.len != 0);
+    const operand = s.?;
+
+    if(nes.isRelativeBranch(op)) {
+        //self.parseOperand(s.?);
+    }
+    else {
+        // Handle immediate mode.
+        if(operand[0] == '#') {
+            return .{ .addr = .Immediate, .operand = try parseOperand(operand[1..]) };
+        }
+        else if(operand.len == 1 and operand[0] == 'A') {
+            return .{ .addr = .Accumulator, .operand = null };
+        }
+    }
+    return error.UnexpectedError;
+}
+
 pub const Assembler6502 = struct {
     alloc: std.mem.Allocator,
     labels: std.ArrayList(Label),
@@ -89,19 +116,7 @@ pub const Assembler6502 = struct {
     }
 
     // fn parseOperand()
-    fn parseAddrAndOperand(_: *Assembler6502, op: CpuOp, tokens: std.mem.TokenIterator(u8, .any)) !?AddrOp {
-        const s = tokens.next();
-        if(s == null) {
-            return .{
-                .addr = .Implied,
-                .operand = null
-            };
-        }
-
-        if(nes.isRelativeBranch(op)) {
-            //self.parseOperand(s.?);
-        }
-    }
+    
 
     pub fn parseLine(self: *Assembler6502, line: []const u8) !?AssemblyLine {
         const commentRemovedLine = utils.removeComment(line);
