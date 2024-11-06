@@ -84,7 +84,50 @@ pub fn parseAddrAndOperand(op: CpuOp, tokens: *std.mem.TokenIterator(u8, .any)) 
         else if(operand.len == 1 and operand[0] == 'A') {
             return .{ .addr = .Accumulator, .operand = null };
         }
+        else if(std.ascii.endsWithIgnoreCase(operand, ",X)")) {
+            return .{ .addr = .IndirectX, .operand = try parseOperand(operand[1..operand.len-3]) };
+        }
+        else if(std.ascii.endsWithIgnoreCase(operand, "),Y")) {
+            return .{ .addr = .IndirectY, .operand = try parseOperand(operand[1..operand.len-3]) };
+        }
+        else if(std.ascii.endsWithIgnoreCase(operand, ")")) {
+            return .{ .addr = .Indirect, .operand = try parseOperand(operand[1..operand.len-1]) };
+        }
+        else if(std.ascii.endsWithIgnoreCase(operand, ",X")) {
+            const val = try parseOperand(operand[0..operand.len-2]);
+            switch(val) {
+                .byte => |_| {
+                    return .{ .addr = .ZeroPageX, .operand = val};
+                },
+                .word => |_| {
+                    return .{ .addr = .AbsoluteX, .operand = val};
+                }
+            }
+        }
+        else if(std.ascii.endsWithIgnoreCase(operand, ",Y")) {
+            const val = try parseOperand(operand[0..operand.len-2]);
+            switch(val) {
+                .byte => |_| {
+                    return .{ .addr = .ZeroPageY, .operand = val};
+                },
+                .word => |_| {
+                    return .{ .addr = .AbsoluteY, .operand = val};
+                }
+            }
+        } 
+        else {
+            const val = try parseOperand(operand);
+            switch(val) {
+                .byte => |_| {
+                    return .{ .addr = .ZeroPage, .operand = val};
+                },
+                .word => |_| {
+                    return .{ .addr = .Absolute, .operand = val};
+                }
+            }
+        }
     }
+
     return error.UnexpectedError;
 }
 

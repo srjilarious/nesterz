@@ -87,6 +87,13 @@ pub fn testParseAccumulatorModeAddrOperand() !void {
     try testz.expectEqual(val.?.operand, null);
 }
 
+pub fn testParseZeroPageModeAddrOperand() !void {
+    var tokens = std.mem.tokenizeAny(u8, "$50", " \t");
+    const val = try nesasm.assembler.parseAddrAndOperand(.ASL, &tokens);
+    try testz.expectEqual(val.?.addr, .ZeroPage);
+    try testz.expectEqual(val.?.operand.?.byte, 0x50);
+}
+
 // pub fn parseLineTokensTest() !void {
 //     var tokens = std.mem.tokenize(u8, "   CDC $10", " \t");
 //     while (tokens.next()) |token| {
