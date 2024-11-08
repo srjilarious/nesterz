@@ -94,6 +94,13 @@ pub fn testParseZeroPageModeAddrOperand() !void {
     try testz.expectEqual(val.?.operand.?.byte, 0x50);
 }
 
+pub fn testParseZeroPageXModeAddrOperand() !void {
+    var tokens = std.mem.tokenizeAny(u8, "$50,X", " \t");
+    const val = try nesasm.assembler.parseAddrAndOperand(.ASL, &tokens);
+    try testz.expectEqual(val.?.addr, .ZeroPageX);
+    try testz.expectEqual(val.?.operand.?.byte, 0x50);
+}
+
 pub fn testParseAbsoluteModeAddrOperand() !void {
     var tokens = std.mem.tokenizeAny(u8, "$3050", " \t");
     const val = try nesasm.assembler.parseAddrAndOperand(.ASL, &tokens);
