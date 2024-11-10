@@ -115,6 +115,13 @@ pub fn testParseAbsoluteModeAddrOperand() !void {
     try testz.expectEqual(val.?.operand.?.word, 0x3050);
 }
 
+pub fn testParseAbsoluteXModeAddrOperand() !void {
+    var tokens = std.mem.tokenizeAny(u8, "$3050,X", " \t");
+    const val = try nesasm.assembler.parseAddrAndOperand(.LDY, &tokens);
+    try testz.expectEqual(val.?.addr, .AbsoluteX);
+    try testz.expectEqual(val.?.operand.?.word, 0x3050);
+}
+
 // pub fn parseLineTokensTest() !void {
 //     var tokens = std.mem.tokenize(u8, "   CDC $10", " \t");
 //     while (tokens.next()) |token| {
