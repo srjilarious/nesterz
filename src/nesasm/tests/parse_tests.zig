@@ -143,6 +143,13 @@ pub fn testParseIndirectXModeAddrOperand() !void {
     try testz.expectEqual(val.?.operand.?.byte, 0x50);
 }
 
+pub fn testParseIndirectYModeAddrOperand() !void {
+    var tokens = std.mem.tokenizeAny(u8, "($50),Y", " \t");
+    const val = try nesasm.assembler.parseAddrAndOperand(.LDA, &tokens);
+    try testz.expectEqual(val.?.addr, .IndirectY);
+    try testz.expectEqual(val.?.operand.?.byte, 0x50);
+}
+
 // pub fn parseLineTokensTest() !void {
 //     var tokens = std.mem.tokenize(u8, "   CDC $10", " \t");
 //     while (tokens.next()) |token| {
