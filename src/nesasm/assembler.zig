@@ -6,6 +6,7 @@ const utils = @import("./utils.zig");
 
 const CpuOp = nes.CpuOp;
 const AddressMode = nes.AddressMode;
+const Instruction6502 = nes.Instruction;
 
 const Operand = structs.Operand;
 const Instruction = structs.Instruction;
@@ -19,6 +20,24 @@ const AddrOp = struct {
     addr: AddressMode,
     operand: ?Operand
 };
+
+const NumCpuOps = @typeInfo(CpuOp).Enum.fields.len;
+const NumAddressModes = @typeInfo(AddressMode).Enum.fields.len;
+pub fn createOpCodeTable() [NumCpuOps][NumAddressModes]?u8 {
+    var opCodeTable : [NumCpuOps][NumAddressModes]?u8 = [_][NumAddressModes]?u8{ [_]?u8{null} ** NumAddressModes } ** NumCpuOps;
+
+    for(0..0xff) |val| {
+        if(Instruction6502.fromOpCode(val)) |inst| {
+            opCodeTable[@intFromEnum(inst.op)][@intFromEnum(inst.mode)] = val;
+        } else |_| {}
+    }
+    return opCodeTable;
+}
+
+pub const OpCodeTable = createOpCodeTable();
+pub fn getOpCode(op: CpuOp, mode: AddressMode) ?u8 {
+    return OpCodeTable[@intFromEnum(op)][@intFromEnum(mode)];
+}
 
 pub fn parseOperand(opStr: []const u8) !Operand {
     // Should not get a zero length string.

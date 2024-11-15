@@ -16,3 +16,4 @@ pub const AssemblyError = structs.AssemblyError;
 pub const AssemblyParseError = structs.AssemblyParseError;
 
 pub const Assembler6502 = assembler.Assembler6502;
+pub const getOpCode = assembler.getOpCode;
