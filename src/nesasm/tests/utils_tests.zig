@@ -26,17 +26,17 @@ pub fn checkOpStringParsing() !void {
 pub fn checkOpCodeLookup() !void {
     // This line breaks currently because of including undocumented versions of NOP.
     // try testz.expectEqual(nasm.getOpCode(.NOP, .Implied), 0xEA);
-    try testz.expectEqual(nasm.getOpCode(.INY, .Implied), 0xC8);
-    try testz.expectEqual(nasm.getOpCode(.ADC, .Immediate), 0x69);
-    try testz.expectEqual(nasm.getOpCode(.ADC, .ZeroPage), 0x65);
-    try testz.expectEqual(nasm.getOpCode(.AND, .ZeroPageX), 0x35);
-    try testz.expectEqual(nasm.getOpCode(.LDX, .ZeroPageY), 0xB6);
-    try testz.expectEqual(nasm.getOpCode(.BEQ, .Relative), 0xF0);
-    try testz.expectEqual(nasm.getOpCode(.ORA, .Absolute), 0x0D);
-    try testz.expectEqual(nasm.getOpCode(.ROR, .AbsoluteX), 0x7E);
-    try testz.expectEqual(nasm.getOpCode(.LDA, .AbsoluteY), 0xB9);
-    try testz.expectEqual(nasm.getOpCode(.ROL, .Accumulator), 0x2A);
-    try testz.expectEqual(nasm.getOpCode(.JMP, .Indirect), 0x6C);
-    try testz.expectEqual(nasm.getOpCode(.SBC, .IndirectX), 0xE1);
-    try testz.expectEqual(nasm.getOpCode(.SBC, .IndirectY), 0xF1);
+    try testz.expectEqual(nasm.getInstFromOp(.INY, .Implied).?.opCode, 0xC8);
+    try testz.expectEqual(nasm.getInstFromOp(.ADC, .Immediate).?.opCode, 0x69);
+    try testz.expectEqual(nasm.getInstFromOp(.ADC, .ZeroPage).?.opCode, 0x65);
+    try testz.expectEqual(nasm.getInstFromOp(.AND, .ZeroPageX).?.opCode, 0x35);
+    try testz.expectEqual(nasm.getInstFromOp(.LDX, .ZeroPageY).?.opCode, 0xB6);
+    try testz.expectEqual(nasm.getInstFromOp(.BEQ, .Relative).?.opCode, 0xF0);
+    try testz.expectEqual(nasm.getInstFromOp(.ORA, .Absolute).?.opCode, 0x0D);
+    try testz.expectEqual(nasm.getInstFromOp(.ROR, .AbsoluteX).?.opCode, 0x7E);
+    try testz.expectEqual(nasm.getInstFromOp(.LDA, .AbsoluteY).?.opCode, 0xB9);
+    try testz.expectEqual(nasm.getInstFromOp(.ROL, .Accumulator).?.opCode, 0x2A);
+    try testz.expectEqual(nasm.getInstFromOp(.JMP, .Indirect).?.opCode, 0x6C);
+    try testz.expectEqual(nasm.getInstFromOp(.SBC, .IndirectX).?.opCode, 0xE1);
+    try testz.expectEqual(nasm.getInstFromOp(.SBC, .IndirectY).?.opCode, 0xF1);
 }

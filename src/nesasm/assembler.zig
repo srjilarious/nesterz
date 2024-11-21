@@ -23,21 +23,58 @@ const AddrOp = struct {
 
 const NumCpuOps = @typeInfo(CpuOp).Enum.fields.len;
 const NumAddressModes = @typeInfo(AddressMode).Enum.fields.len;
-pub fn createOpCodeTable() [NumCpuOps][NumAddressModes]?u8 {
-    var opCodeTable : [NumCpuOps][NumAddressModes]?u8 = [_][NumAddressModes]?u8{ [_]?u8{null} ** NumAddressModes } ** NumCpuOps;
+pub fn createOpCodeTable() [NumCpuOps][NumAddressModes]?Instruction6502 {
+    var opCodeTable : [NumCpuOps][NumAddressModes]?Instruction6502 = [_][NumAddressModes]?Instruction6502{ [_]?Instruction6502{null} ** NumAddressModes } ** NumCpuOps;
 
     for(0..0xff) |val| {
         if(Instruction6502.fromOpCode(val)) |inst| {
-            opCodeTable[@intFromEnum(inst.op)][@intFromEnum(inst.mode)] = val;
+            opCodeTable[@intFromEnum(inst.op)][@intFromEnum(inst.mode)] = inst;
         } else |_| {}
     }
     return opCodeTable;
 }
 
 pub const OpCodeTable = createOpCodeTable();
-pub fn getOpCode(op: CpuOp, mode: AddressMode) ?u8 {
+pub fn getInstFromOp(op: CpuOp, mode: AddressMode) ?Instruction6502 {
     return OpCodeTable[@intFromEnum(op)][@intFromEnum(mode)];
 }
+
+pub fn codeGen(op:CpuOp, addrOp: AddrOp, buff: *[4]u8) ?[]u8 {
+    const inst = getInstFromOp(op, addrOp.addr);
+    if(inst == null) return null;
+
+    // var buffv = &buff;
+    switch(addrOp.addr) {
+        .Implied => {
+            if(addrOp.operand != null) {
+                // TODO: Add in error handling w/ messages..
+                return null;
+            }
+            buff.* = .{ inst.?.opCode, 0, 0, 0};
+            return buff[0..1];
+        },
+        .Immediate => {
+            // Must have an operand to be valid.
+            if(addrOp.operand == null) {
+                // TODO: Add in error handling w/ messages..
+                return null;
+            }
+            
+            switch(addrOp.operand.?) {
+                .byte => |b| {
+                    buff.* = .{ inst.?.opCode, b, 0, 0 };
+                    return buff[0..2];
+                },
+                .word => {
+                    // Immediates must be bytes.
+                    return null;
+                }
+            }
+        },
+        else => { @panic("Not implemented yet!"); }
+    }
+}
+
 
 pub fn parseOperand(opStr: []const u8) !Operand {
     // Should not get a zero length string.
