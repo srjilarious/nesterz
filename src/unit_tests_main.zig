@@ -4,6 +4,7 @@ const fix = @import("nesterz/tests/fixtures.zig");
 const testz = @import("testz");
 
 const Tests = testz.discoverTests(.{
+    testz.Group{ .name = "Misc/Cpu tests", .tag = "cpu", .mod = @import("nesterz/tests/cpu.zig")},
     testz.Group{ .name = "ADC instruction", .tag = "adc", .mod = @import("nesterz/tests/adc_inst.zig")},
     testz.Group{ .name = "AND instruction", .tag = "and", .mod = @import("nesterz/tests/and_inst.zig")},
     testz.Group{ .name = "ASL instruction", .tag = "asl", .mod = @import("nesterz/tests/asl_inst.zig")},
