@@ -37,3 +37,17 @@ pub fn genImpliedInstructions() !void {
     try checkCodeGen(.TXS, .Implied, null, &[_]u8{0x9A});
     try checkCodeGen(.TYA, .Implied, null, &[_]u8{0x98});
 }
+
+pub fn genImmediateInstructions() !void {
+    try checkCodeGen(.ADC, .Immediate, .{ .byte = 0x10 }, &[_]u8{ 0x69, 0x10 });
+    try checkCodeGen(.AND, .Immediate, .{ .byte = 0x20 }, &[_]u8{ 0x29, 0x20 });
+    try checkCodeGen(.CMP, .Immediate, .{ .byte = 0x30 }, &[_]u8{ 0xC9, 0x30 });
+    try checkCodeGen(.CPX, .Immediate, .{ .byte = 0x40 }, &[_]u8{ 0xE0, 0x40 });
+    try checkCodeGen(.CPY, .Immediate, .{ .byte = 0x50 }, &[_]u8{ 0xC0, 0x50 });
+    try checkCodeGen(.EOR, .Immediate, .{ .byte = 0x60 }, &[_]u8{ 0x49, 0x60 });
+    try checkCodeGen(.LDA, .Immediate, .{ .byte = 0x70 }, &[_]u8{ 0xA9, 0x70 });
+    try checkCodeGen(.LDX, .Immediate, .{ .byte = 0x88 }, &[_]u8{ 0xA2, 0x88 });
+    try checkCodeGen(.LDY, .Immediate, .{ .byte = 0x99 }, &[_]u8{ 0xA0, 0x99 });
+    try checkCodeGen(.ORA, .Immediate, .{ .byte = 0xAA }, &[_]u8{ 0x09, 0xAA });
+    try checkCodeGen(.SBC, .Immediate, .{ .byte = 0xBB }, &[_]u8{ 0xE9, 0xBB });
+}
