@@ -45,7 +45,7 @@ pub fn codeGen(op:CpuOp, addrOp: AddrOp, buff: *[4]u8) ?[]u8 {
 
     // var buffv = &buff;
     switch(addrOp.addr) {
-        .Implied => {
+        .Implied, .Accumulator => {
             if(addrOp.operand != null) {
                 // TODO: Add in error handling w/ messages..
                 return null;

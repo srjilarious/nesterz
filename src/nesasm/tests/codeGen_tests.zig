@@ -38,6 +38,13 @@ pub fn genImpliedInstructions() !void {
     try checkCodeGen(.TYA, .Implied, null, &[_]u8{0x98});
 }
 
+pub fn genAccumulatorInstructions() !void {
+    try checkCodeGen(.ASL, .Accumulator, null, &[_]u8{0x0A});
+    try checkCodeGen(.LSR, .Accumulator, null, &[_]u8{0x4A});
+    try checkCodeGen(.ROL, .Accumulator, null, &[_]u8{0x2A});
+    try checkCodeGen(.ROR, .Accumulator, null, &[_]u8{0x6A});
+}
+
 pub fn genImmediateInstructions() !void {
     try checkCodeGen(.ADC, .Immediate, .{ .byte = 0x10 }, &[_]u8{ 0x69, 0x10 });
     try checkCodeGen(.AND, .Immediate, .{ .byte = 0x20 }, &[_]u8{ 0x29, 0x20 });
