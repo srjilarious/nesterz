@@ -53,7 +53,7 @@ pub fn codeGen(op:CpuOp, addrOp: AddrOp, buff: *[4]u8) ?[]u8 {
             buff.* = .{ inst.?.opCode, 0, 0, 0};
             return buff[0..1];
         },
-        .Immediate => {
+        .Immediate, .ZeroPage, .ZeroPageX, .ZeroPageY => {
             // Must have an operand to be valid.
             if(addrOp.operand == null) {
                 // TODO: Add in error handling w/ messages..
