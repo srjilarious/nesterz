@@ -82,3 +82,22 @@ pub fn genZeroPageInstructions() !void {
     try checkCodeGen(.STX, .ZeroPage, .{ .byte = 0xDD }, &[_]u8{ 0x86, 0xDD });
     try checkCodeGen(.STY, .ZeroPage, .{ .byte = 0xEE }, &[_]u8{ 0x84, 0xEE });
 }
+
+pub fn genZeroPageXInstructions() !void {
+    try checkCodeGen(.ADC, .ZeroPageX, .{ .byte = 0x10 }, &[_]u8{ 0x75, 0x10 });
+    try checkCodeGen(.AND, .ZeroPageX, .{ .byte = 0x20 }, &[_]u8{ 0x35, 0x20 });
+    try checkCodeGen(.ASL, .ZeroPageX, .{ .byte = 0x25 }, &[_]u8{ 0x16, 0x25 });
+    try checkCodeGen(.CMP, .ZeroPageX, .{ .byte = 0x30 }, &[_]u8{ 0xD5, 0x30 });
+    try checkCodeGen(.DEC, .ZeroPageX, .{ .byte = 0x55 }, &[_]u8{ 0xD6, 0x55 });
+    try checkCodeGen(.EOR, .ZeroPageX, .{ .byte = 0x60 }, &[_]u8{ 0x55, 0x60 });
+    try checkCodeGen(.INC, .ZeroPageX, .{ .byte = 0x65 }, &[_]u8{ 0xF6, 0x65 });
+    try checkCodeGen(.LDA, .ZeroPageX, .{ .byte = 0x70 }, &[_]u8{ 0xB5, 0x70 });
+    try checkCodeGen(.LDY, .ZeroPageX, .{ .byte = 0x99 }, &[_]u8{ 0xB4, 0x99 });
+    try checkCodeGen(.LSR, .ZeroPageX, .{ .byte = 0x9D }, &[_]u8{ 0x56, 0x9D });
+    try checkCodeGen(.ORA, .ZeroPageX, .{ .byte = 0xAA }, &[_]u8{ 0x15, 0xAA });
+    try checkCodeGen(.ROL, .ZeroPageX, .{ .byte = 0xAB }, &[_]u8{ 0x36, 0xAB });
+    try checkCodeGen(.ROR, .ZeroPageX, .{ .byte = 0xAC }, &[_]u8{ 0x76, 0xAC });
+    try checkCodeGen(.SBC, .ZeroPageX, .{ .byte = 0xBB }, &[_]u8{ 0xF5, 0xBB });
+    try checkCodeGen(.STA, .ZeroPageX, .{ .byte = 0xCC }, &[_]u8{ 0x95, 0xCC });
+    try checkCodeGen(.STY, .ZeroPageX, .{ .byte = 0xEE }, &[_]u8{ 0x94, 0xEE });
+}
