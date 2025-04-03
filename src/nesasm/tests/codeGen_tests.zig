@@ -101,3 +101,8 @@ pub fn genZeroPageXInstructions() !void {
     try checkCodeGen(.STA, .ZeroPageX, .{ .byte = 0xCC }, &[_]u8{ 0x95, 0xCC });
     try checkCodeGen(.STY, .ZeroPageX, .{ .byte = 0xEE }, &[_]u8{ 0x94, 0xEE });
 }
+
+pub fn genZeroPageYInstructions() !void {
+    try checkCodeGen(.LDX, .ZeroPageY, .{ .byte = 0x10 }, &[_]u8{ 0xB6, 0x10 });
+    try checkCodeGen(.STX, .ZeroPageY, .{ .byte = 0x20 }, &[_]u8{ 0x96, 0x20 });
+}
