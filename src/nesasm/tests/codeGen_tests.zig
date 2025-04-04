@@ -106,3 +106,14 @@ pub fn genZeroPageYInstructions() !void {
     try checkCodeGen(.LDX, .ZeroPageY, .{ .byte = 0x10 }, &[_]u8{ 0xB6, 0x10 });
     try checkCodeGen(.STX, .ZeroPageY, .{ .byte = 0x20 }, &[_]u8{ 0x96, 0x20 });
 }
+
+pub fn genRelativeInstructions() !void {
+    try checkCodeGen(.BCC, .Relative, .{ .byte = 0x10 }, &[_]u8{ 0x90, 0x10 });
+    try checkCodeGen(.BCS, .Relative, .{ .byte = 0x20 }, &[_]u8{ 0xB0, 0x20 });
+    try checkCodeGen(.BEQ, .Relative, .{ .byte = 0x30 }, &[_]u8{ 0xF0, 0x30 });
+    try checkCodeGen(.BMI, .Relative, .{ .byte = 0x40 }, &[_]u8{ 0x30, 0x40 });
+    try checkCodeGen(.BNE, .Relative, .{ .byte = 0x50 }, &[_]u8{ 0xD0, 0x50 });
+    try checkCodeGen(.BPL, .Relative, .{ .byte = 0x60 }, &[_]u8{ 0x10, 0x60 });
+    try checkCodeGen(.BVC, .Relative, .{ .byte = 0x70 }, &[_]u8{ 0x50, 0x70 });
+    try checkCodeGen(.BVS, .Relative, .{ .byte = 0x80 }, &[_]u8{ 0x70, 0x80 });
+}
