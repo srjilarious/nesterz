@@ -117,3 +117,27 @@ pub fn genRelativeInstructions() !void {
     try checkCodeGen(.BVC, .Relative, .{ .byte = 0x70 }, &[_]u8{ 0x50, 0x70 });
     try checkCodeGen(.BVS, .Relative, .{ .byte = 0x80 }, &[_]u8{ 0x70, 0x80 });
 }
+
+pub fn genAbsoluteInstructions() !void {
+    try checkCodeGen(.ADC, .Absolute, .{ .word = 0x3010 }, &[_]u8{ 0x6D, 0x10, 0x30 });
+    try checkCodeGen(.AND, .Absolute, .{ .word = 0x3020 }, &[_]u8{ 0x2D, 0x20, 0x30 });
+    try checkCodeGen(.ASL, .Absolute, .{ .word = 0x3025 }, &[_]u8{ 0x0E, 0x25, 0x30 });
+    try checkCodeGen(.BIT, .Absolute, .{ .word = 0x302a }, &[_]u8{ 0x2C, 0x2A, 0x30 });
+    try checkCodeGen(.CMP, .Absolute, .{ .word = 0x3030 }, &[_]u8{ 0xCD, 0x30, 0x30 });
+    try checkCodeGen(.CPX, .Absolute, .{ .word = 0x3040 }, &[_]u8{ 0xEC, 0x40, 0x30 });
+    try checkCodeGen(.CPY, .Absolute, .{ .word = 0x3050 }, &[_]u8{ 0xCC, 0x50, 0x30 });
+    try checkCodeGen(.DEC, .Absolute, .{ .word = 0x3055 }, &[_]u8{ 0xCE, 0x55, 0x30 });
+    try checkCodeGen(.EOR, .Absolute, .{ .word = 0x3060 }, &[_]u8{ 0x4D, 0x60, 0x30 });
+    try checkCodeGen(.INC, .Absolute, .{ .word = 0x3065 }, &[_]u8{ 0xEE, 0x65, 0x30 });
+    try checkCodeGen(.LDA, .Absolute, .{ .word = 0x3070 }, &[_]u8{ 0xAD, 0x70, 0x30 });
+    try checkCodeGen(.LDX, .Absolute, .{ .word = 0x3088 }, &[_]u8{ 0xAE, 0x88, 0x30 });
+    try checkCodeGen(.LDY, .Absolute, .{ .word = 0x3099 }, &[_]u8{ 0xAC, 0x99, 0x30 });
+    try checkCodeGen(.LSR, .Absolute, .{ .word = 0x309D }, &[_]u8{ 0x4E, 0x9D, 0x30 });
+    try checkCodeGen(.ORA, .Absolute, .{ .word = 0x30AA }, &[_]u8{ 0x0D, 0xAA, 0x30 });
+    try checkCodeGen(.ROL, .Absolute, .{ .word = 0x30AB }, &[_]u8{ 0x2E, 0xAB, 0x30 });
+    try checkCodeGen(.ROR, .Absolute, .{ .word = 0x30AC }, &[_]u8{ 0x6E, 0xAC, 0x30 });
+    try checkCodeGen(.SBC, .Absolute, .{ .word = 0x30BB }, &[_]u8{ 0xED, 0xBB, 0x30 });
+    try checkCodeGen(.STA, .Absolute, .{ .word = 0x30CC }, &[_]u8{ 0x8D, 0xCC, 0x30 });
+    try checkCodeGen(.STX, .Absolute, .{ .word = 0x30DD }, &[_]u8{ 0x8E, 0xDD, 0x30 });
+    try checkCodeGen(.STY, .Absolute, .{ .word = 0x30EE }, &[_]u8{ 0x8C, 0xEE, 0x30 });
+}

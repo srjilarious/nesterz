@@ -71,6 +71,25 @@ pub fn codeGen(op:CpuOp, addrOp: AddrOp, buff: *[4]u8) ?[]u8 {
                 }
             }
         },
+        .Absolute => {
+            // Must have an operand to be valid.
+            if(addrOp.operand == null) {
+                // TODO: Add in error handling w/ messages..
+                return null;
+            }
+            
+            switch(addrOp.operand.?) {
+                .byte => {
+                    // Values must be words.
+                    return null;
+                },
+                .word => |w| {
+                    buff.* = .{ inst.?.opCode, @intCast(w & 0xff), @intCast(w >> 8), 0 };
+                    return buff[0..3];
+                }
+            }
+
+        },
         else => { @panic("Not implemented yet!"); }
     }
 }
