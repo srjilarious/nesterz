@@ -21,8 +21,8 @@ const AddrOp = struct {
     operand: ?Operand
 };
 
-const NumCpuOps = @typeInfo(CpuOp).Enum.fields.len;
-const NumAddressModes = @typeInfo(AddressMode).Enum.fields.len;
+const NumCpuOps = @typeInfo(CpuOp).@"enum".fields.len;
+const NumAddressModes = @typeInfo(AddressMode).@"enum".fields.len;
 pub fn createOpCodeTable() [NumCpuOps][NumAddressModes]?Instruction6502 {
     var opCodeTable : [NumCpuOps][NumAddressModes]?Instruction6502 = [_][NumAddressModes]?Instruction6502{ [_]?Instruction6502{null} ** NumAddressModes } ** NumCpuOps;
 
