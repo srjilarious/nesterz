@@ -210,6 +210,39 @@ pub fn adcAbsoluteYTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
 }
 
-pub fn skip_adcIndirectXTest() !void {}
+pub fn adcIndirectXTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x61, 0x10, // ADC ($10,X)
+        0x61, 0x12, // ADC ($12,X)
+        0x61, 0x14, // ADC ($14,X)
+        0x61, 0x16, // ADC ($16,X)
+    });
+    defer tn.deinit();
+
+    tn.writeBytes(0x15, &[_]u8{ 0x10, 0x30, 0x11, 0x30, 0x13, 0x30, 0x15, 0x30 });
+    tn.writeBytes(0x3010, &[_]u8{ 0x0, 0x10, 0xcd, 0x35, 0xcd, 0x85 });
+
+    tn.cpu.a = 0x0;
+    tn.cpu.x = 0x5;
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.cpu.a, 0x0);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.cpu.a, 0x10);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.cpu.a, 0x45);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.cpu.a, 0xca);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+}
 
 pub fn skip_adcIndirectYTest() !void {}
