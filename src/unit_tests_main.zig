@@ -23,6 +23,7 @@ const Tests = testz.discoverTests(.{
     testz.Group{ .name = "ROL instruction", .tag = "rol", .mod = @import("nesterz/tests/rol_inst.zig")},
     testz.Group{ .name = "ROR instruction", .tag = "ror", .mod = @import("nesterz/tests/ror_inst.zig")},
     testz.Group{ .name = "SBC instruction", .tag = "sbc", .mod = @import("nesterz/tests/sbc_inst.zig")},
+    testz.Group{ .name = "Stack Instructions", .tag = "stack", .mod = @import("nesterz/tests/stack_inst.zig")},
     testz.Group{ .name = "Store Instructions", .tag = "store", .mod = @import("nesterz/tests/store_inst.zig")},
     testz.Group{ .name = "Transfer Instructions", .tag = "transfer", .mod = @import("nesterz/tests/transfer_inst.zig")},
     testz.Group{ .name = "Assembler Utils", .tag = "asm_utils", .mod = @import("nesasm/tests/utils_tests.zig") },

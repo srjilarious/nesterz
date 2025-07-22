@@ -417,10 +417,10 @@ pub const Instruction6502 = struct {
             0x11 => Instruction6502.init(opCode, .ORA, .IndirectY, 2, 5),
 
             // PHA - Push Accumulator
-            0x48 => Instruction6502.init(opCode, .PHA, .Implied, 1, 4),
+            0x48 => Instruction6502.init(opCode, .PHA, .Implied, 1, 3),
 
             // PHP - Push Processor Status
-            0x08 => Instruction6502.init(opCode, .PHP, .Implied, 1, 4),
+            0x08 => Instruction6502.init(opCode, .PHP, .Implied, 1, 3),
 
             // PLA - Pull Accumulator
             0x68 => Instruction6502.init(opCode, .PLA, .Implied, 1, 4),

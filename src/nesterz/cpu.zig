@@ -570,9 +570,31 @@ pub const Cpu6502 = struct {
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
             },
-            // .PHA => {},
+            .PHA => {
+                if(self.currCycle == 0) {
+                    self.addrBus = StackBase +% @as(u16, self.sp);
+                    self.dataBus = self.a;
+                    self.busState = ReadWriteState.Write;
+                }
+                else if(self.currCycle == 1) {
+                    self.sp = self.sp +% 1;
+                }
+            },
             // .PHP => {},
-            // .PLA => {},
+            .PLA => {
+                if(self.currCycle == 0) {
+                    self.sp = self.sp -% 1;
+                }
+                else if(self.currCycle == 1) {
+                    self.addrBus = StackBase +% @as(u16, self.sp);
+                    self.busState = ReadWriteState.Read;
+                }
+                else if(self.currCycle == 2) {
+                    self.a = self.dataBus;
+                    self.checkZeroFlag(self.a);
+                    self.checkNegativeFlag(self.a);
+                }
+            },
             // .PLP => {},
             .ROL => {
                 const temp: u8 = @intFromBool(self.getFlag(.Carry));
