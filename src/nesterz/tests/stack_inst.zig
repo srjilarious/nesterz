@@ -50,4 +50,25 @@ pub fn pushPullAccumulatorTest() !void {
     try testz.expectEqual(tn.cpu.sp, 0);
 }
 
-pub fn skip_pushPullProcStatusTest() !void {}
+pub fn pushPullProcStatusTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x08, // PHP
+        0x28, // PLP
+    });
+
+    defer tn.deinit();
+
+    tn.cpu.status = 0xff;
+
+    try testz.expectEqual(tn.cpu.sp, 0);
+
+    try testz.expectEqual(tn.tickInstruction(), 3);
+    try testz.expectEqual(tn.readByte(0x100), 0xff);
+    try testz.expectEqual(tn.cpu.sp, 1);
+
+    tn.cpu.status = 0x27;
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.status, 0xff);
+    try testz.expectEqual(tn.cpu.sp, 0);
+}
