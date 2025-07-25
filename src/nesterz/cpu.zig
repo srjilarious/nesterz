@@ -331,8 +331,28 @@ pub const Cpu6502 = struct {
                     self.shouldFetch = false;
                 }
             },
-            else => {
-                @panic("Unimplemented address mode!");
+            .IndirectY => {
+                if(self.currCycle == 1) {
+                    self.addrBus = @intCast(self.dataBus);
+                    self.shouldFetch = false;
+                    self.busState = .Read;
+                }
+                else if(self.currCycle == 2) {
+                    self.internalAddr = @intCast(self.dataBus);
+                    self.addrBus +%= 1;
+                    self.shouldFetch = false;
+                    self.busState = .Read;
+                }
+                else if(self.currCycle == 3) {
+                    self.internalAddr = ((@as(u16, @intCast(self.dataBus)) << 8)) | self.internalAddr;
+                    self.addrBus = self.internalAddr + @as(u16, self.y);
+                    self.shouldFetch = false;
+                    self.busState = .Read;
+                }
+                else if(self.currCycle == 4) {
+                    self.workingVal = @intCast(self.dataBus);
+                    // self.shouldFetch = false;
+                }
             },
         }
     }

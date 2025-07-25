@@ -171,4 +171,36 @@ pub fn eorAbsoluteYTest() !void {
 
 pub fn skip_eorIndirectXTest() !void {}
 
-pub fn skip_eorIndirectYTest() !void {}
+pub fn eorIndirectYTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x51, 0x20, // EOR ($20),Y ($AA)
+        0x51, 0x22, // EOR ($22),Y ($22)
+        0x51, 0x26, // EOR ($26),Y ($F5)
+    });
+    defer tn.deinit();
+
+    tn.printDebug = true;
+    tn.writeBytes(0x20, &[_]u8{ 0x01, 0x10, 0x02, 0x20, 0xcd, 0xef, 0x03, 0x30 });
+
+    tn.writeByte(0x1004, 0xaa);
+    tn.writeByte(0x2005, 0x22);
+    tn.writeByte(0x3006, 0xf5);
+
+    tn.cpu.a = 0x88;
+    tn.cpu.y = 3;
+
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.cpu.a, 0x22);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.cpu.a, 0x0);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.cpu.a, 0xf5);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+}
