@@ -399,4 +399,28 @@ pub fn ldyAbsoluteTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 }
 
-pub fn skip_ldyAbsoluteXTest() !void {}
+pub fn ldyAbsoluteXTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0xBC, 0x10, 0x30, // LDY $3010,X
+        0xBC, 0x11, 0x30, // LDY $3011,X
+        0xBC, 0x12, 0x30, // LDY $3012,X
+    });
+    defer tn.deinit();
+
+    tn.cpu.x = 5;
+    tn.writeBytes(0x3015, &[_]u8{ 0xff, 0x42, 0x0 });
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.y, 0xff);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), true);
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.y, 0x42);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), false);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+
+    try testz.expectEqual(tn.tickInstruction(), 4);
+    try testz.expectEqual(tn.cpu.y, 0);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Zero), true);
+    try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
+}
