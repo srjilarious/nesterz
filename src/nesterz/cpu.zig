@@ -378,8 +378,7 @@ pub const Cpu6502 = struct {
             AddressMode.Relative => self.currCycle == 1,
             AddressMode.Absolute => {
                 return switch(self.currInst.op) {
-                    CpuOp.JMP, CpuOp.JSR  => self.currCycle == 2, 
-                    // CpuOp.JSR => self.currCycle == 2,
+                    CpuOp.JMP, CpuOp.JSR  => self.currCycle >= 2,
                     else => self.currCycle == 3,
                 };
             },
@@ -562,7 +561,38 @@ pub const Cpu6502 = struct {
                 self.addrBus = self.internalAddr;
                 self.busState = .Read;
             },
-            // .JSR => {},
+            .JSR => {
+                // Don't use the normal fetch logic, setup the address bus directly.
+                self.shouldFetch = false;
+
+                if(self.currCycle == 2) {
+                    // Push the status register on to the stack
+                    self.addrBus = StackBase + self.sp;
+                    self.dataBus = self.status;
+                    self.busState = .Write;
+                    self.sp = self.sp +% 1;
+                }
+                else if(self.currCycle == 3) {
+                    // Push the low byte of the PC to the stack
+                    self.addrBus = StackBase + self.sp;
+                    self.dataBus = @as(u8, @truncate(self.pc));
+                    self.busState = .Write;
+                    self.sp = self.sp +% 1;
+                }
+                else if(self.currCycle == 4) {
+                    // Push the high byte of the PC.
+                    self.addrBus = StackBase + self.sp;
+                    self.dataBus = @as(u8, @truncate(self.pc >> 8));
+                    self.busState = .Write;
+                    self.sp = self.sp +% 1;
+                }
+                else if(self.currCycle == 5) {
+                    // Jump to the address we read as part of the instruction.
+                    self.addrBus = self.internalAddr;
+                    self.pc = self.internalAddr +% 1;
+                    self.busState = .Read;
+                }
+            },
             .LDA => {
                 self.a = self.dataBus;
                 self.checkZeroFlag(self.a);
@@ -651,7 +681,37 @@ pub const Cpu6502 = struct {
                 self.setFlag(.Zero, self.workingVal == 0);
             },
             // .RTI => {},
-            // .RTS => {},
+            .RTS => {
+                self.shouldFetch = false;
+
+                if(self.currCycle == 1) {
+                    self.sp = self.sp -% 1;
+                }
+                else if(self.currCycle == 2) {
+                    self.addrBus = StackBase + self.sp;
+                    self.busState = .Read;
+                    self.sp = self.sp -% 1;
+                }
+                else if(self.currCycle == 3) {
+                    self.workingVal = @as(u16, self.dataBus) << 8;
+                    self.addrBus = StackBase + self.sp;
+                    self.busState = .Read;
+                    self.sp = self.sp -% 1;
+                }
+                else if(self.currCycle == 4) {
+                    self.workingVal = self.workingVal | @as(u16, self.dataBus);
+                    self.addrBus = StackBase + self.sp;
+                    self.busState = .Read;
+                    // self.sp = self.sp -% 1;
+                }
+                else if(self.currCycle == 5) {
+                    self.status = self.dataBus;
+
+                    self.addrBus = self.workingVal;
+                    self.pc = self.workingVal + 1;
+                    self.busState = .Read;
+                }
+            },
             .SBC => {
                 const subResult = subtract(self.a, @truncate(self.workingVal), self.getFlag(.Carry));
                 self.a = subResult.val;

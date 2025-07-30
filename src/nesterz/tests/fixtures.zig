@@ -44,12 +44,16 @@ pub const TestNes = struct {
 
     pub fn tick(self: *TestNes) void {
         if(self.printDebug) {
-            std.debug.print("[{}] currInst=0x{x}, cycle={}\n", .{
+            std.debug.print("\n[{}] currInst=0x{x}, cycle={}\n", .{
                     self.cpu.procState, self.cpu.currInst.opCode, self.cpu.currCycle 
             });
         }
 
         self.cpu.tick();
+
+        if(self.printDebug) {
+            std.debug.print("A=0x{x}, X=0x{x}, Y=0x{x}. SP=0x{x}, Status=0x{x}\n", .{self.cpu.a, self.cpu.x, self.cpu.y, self.cpu.sp, self.cpu.status});
+        }
         switch(self.cpu.busState) {
             ReadWriteState.Read => {
                 self.cpu.dataBus = self.mem[self.cpu.addrBus];
