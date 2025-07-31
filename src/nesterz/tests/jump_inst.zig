@@ -5,7 +5,28 @@ const testz = @import("testz");
 
 const CpuFlags = nes.CpuFlags;
 
-pub fn skip_jmpAbsoluteTest() !void {}
+pub fn jmpAbsoluteTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x4C, 0x00, 0xFF, // JMP $ff00 - Jump to 0xFF00
+        0xEA,
+    });
+
+    // Jump back to original address.
+    tn.writeBytes(0xff00, &[_]u8{
+        0x4C, 0x00, 0x02, // JMP $200
+        0xEA, // INY
+    });
+    defer tn.deinit();
+
+    try testz.expectEqual(tn.cpu.pc, 0x201);
+    try testz.expectEqual(tn.tickInstruction(), 3);
+
+    try testz.expectEqual(tn.cpu.pc, 0xff01);
+    try testz.expectEqual(tn.tickInstruction(), 3);
+
+    try testz.expectEqual(tn.cpu.pc, 0x201);
+    try testz.expectEqual(tn.tickInstruction(), 3);
+}
 
 pub fn skip_jmpIndirectTest() !void {}
 
