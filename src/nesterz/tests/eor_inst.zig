@@ -177,7 +177,6 @@ pub fn eorIndirectXTest() !void {
     });
     defer tn.deinit();
 
-    tn.printDebug = true;
     tn.writeBytes(0x23, &[_]u8{ 0x01, 0x10, 0x02, 0x20, 0xcd, 0xef, 0x03, 0x30 });
 
     tn.writeByte(0x1001, 0xaa);
@@ -211,7 +210,6 @@ pub fn eorIndirectYTest() !void {
     });
     defer tn.deinit();
 
-    tn.printDebug = true;
     tn.writeBytes(0x20, &[_]u8{ 0x01, 0x10, 0x02, 0x20, 0xcd, 0xef, 0x03, 0x30 });
 
     tn.writeByte(0x1004, 0xaa);

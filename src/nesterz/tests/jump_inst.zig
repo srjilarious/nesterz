@@ -8,13 +8,13 @@ const CpuFlags = nes.CpuFlags;
 pub fn jmpAbsoluteTest() !void {
     var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
         0x4C, 0x00, 0xFF, // JMP $ff00 - Jump to 0xFF00
-        0xEA,
+        0xEA, // NOP
     });
 
     // Jump back to original address.
     tn.writeBytes(0xff00, &[_]u8{
         0x4C, 0x00, 0x02, // JMP $200
-        0xEA, // INY
+        0xEA, // NOP
     });
     defer tn.deinit();
 
@@ -28,7 +28,26 @@ pub fn jmpAbsoluteTest() !void {
     try testz.expectEqual(tn.tickInstruction(), 3);
 }
 
-pub fn skip_jmpIndirectTest() !void {}
+pub fn jmpIndirectTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x6C, 0x10, 0x20, // JMP ($2010) - Jump indirectly to 0xFF00
+        0xEA,
+    });
+
+    // Write address in memory
+    tn.writeBytes(0x2010, &[_]u8{ 0x00, 0xff });
+
+    // Jump back to original address.
+    tn.writeBytes(0xff00, &[_]u8{
+        0xEA, // NOP
+    });
+    defer tn.deinit();
+
+    try testz.expectEqual(tn.cpu.pc, 0x201);
+    try testz.expectEqual(tn.tickInstruction(), 5);
+
+    try testz.expectEqual(tn.cpu.pc, 0xff01);
+}
 
 pub fn jsrAbsoluteTest() !void {
     var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
