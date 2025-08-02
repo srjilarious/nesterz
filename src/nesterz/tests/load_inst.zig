@@ -162,7 +162,24 @@ pub fn ldaAbsoluteYTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(CpuFlags.Negative), false);
 }
 
-pub fn skip_ldaIndirectXTest() !void {}
+pub fn ldaIndirectXTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0xA1, 0x10, // LDA ($10,X)
+        0xA1, 0x12, // LDA ($12,X)
+    });
+    defer tn.deinit();
+
+    tn.cpu.x = 5;
+
+    tn.writeBytes(0x15, &[_]u8{ 0x10, 0x30, 0x12, 0x30 });
+    tn.writeBytes(0x3010, &[_]u8{ 0x11, 0x22, 0x33 });
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.cpu.a, 0x11);
+
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.cpu.a, 0x33);
+}
 
 pub fn skip_ldaIndirectYTest() !void {}
 
