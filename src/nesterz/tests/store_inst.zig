@@ -137,7 +137,30 @@ pub fn staIndirectXTest() !void {
     try testz.expectEqual(tn.readByte(0x2000), 123);
 }
 
-pub fn skip_staIndirectYTest() !void {}
+pub fn staIndirectYTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0x91, 0x10, // STA ($10),Y
+        0x91, 0x14, // STA ($14),Y
+        0x91, 0x16, // STA ($16),Y
+    });
+    defer tn.deinit();
+
+    tn.printDebug = true;
+    tn.writeBytes(0x10, &[_]u8{ 0x00, 0x30, 0xcd, 0xef, 0x10, 0x30, 0x00, 0x20 });
+    tn.cpu.y = 4;
+
+    tn.cpu.a = 100;
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x3004), 100);
+
+    tn.cpu.a = 200;
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x3014), 200);
+
+    tn.cpu.a = 123;
+    try testz.expectEqual(tn.tickInstruction(), 6);
+    try testz.expectEqual(tn.readByte(0x2004), 123);
+}
 
 // STX tets
 //

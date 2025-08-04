@@ -345,7 +345,11 @@ pub const Cpu6502 = struct {
                 }
                 else if(self.currCycle == 3) {
                     self.internalAddr = ((@as(u16, @intCast(self.dataBus)) << 8)) | self.internalAddr;
-                    self.addrBus = self.internalAddr + @as(u16, self.y);
+
+                    // Add the Y register to the internal address as well.
+                    self.internalAddr = self.internalAddr + @as(u16, self.y);
+                    
+                    self.addrBus = self.internalAddr;
                     self.shouldFetch = false;
                     self.busState = .Read;
                 }
