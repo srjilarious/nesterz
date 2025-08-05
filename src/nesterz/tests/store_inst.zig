@@ -145,7 +145,6 @@ pub fn staIndirectYTest() !void {
     });
     defer tn.deinit();
 
-    tn.printDebug = true;
     tn.writeBytes(0x10, &[_]u8{ 0x00, 0x30, 0xcd, 0xef, 0x10, 0x30, 0x00, 0x20 });
     tn.cpu.y = 4;
 
