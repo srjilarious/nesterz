@@ -181,7 +181,24 @@ pub fn ldaIndirectXTest() !void {
     try testz.expectEqual(tn.cpu.a, 0x33);
 }
 
-pub fn skip_ldaIndirectYTest() !void {}
+pub fn ldaIndirectYTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0xB1, 0x10, // LDA ($10),Y
+        0xB1, 0x12, // LDA ($12),Y
+    });
+    defer tn.deinit();
+
+    tn.cpu.y = 5;
+
+    tn.writeBytes(0x10, &[_]u8{ 0x10, 0x30, 0x12, 0x30 });
+    tn.writeBytes(0x3015, &[_]u8{ 0x11, 0x22, 0x33 });
+
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.cpu.a, 0x11);
+
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.cpu.a, 0x33);
+}
 
 // LDX instruction tests.
 //
