@@ -190,4 +190,30 @@ pub fn sbcIndirectXTest() !void {
     try testz.expectEqual(tn.cpu.getFlag(.Overflow), false);
 }
 
-pub fn skip_sbcIndirectYTest() !void {}
+pub fn sbcIndirectYTest() !void {
+    var tn = fix.TestNes.initWithTesData(&std.heap.page_allocator, &[_]u8{
+        0xF1, 0x10, // SBC ($10),Y
+        0xF1, 0x12, // SBC ($12),Y
+    });
+    defer tn.deinit();
+
+    tn.writeBytes(0x10, &[_]u8{ 0x10, 0x30, 0x11, 0x30 });
+    tn.writeBytes(0x3015, &[_]u8{ 0x10, 0x1 });
+
+    // Start with the overflow flag set.
+    tn.cpu.setFlag(.Carry, true);
+    tn.cpu.a = 0x3;
+    tn.cpu.y = 0x5;
+
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    const res: i8 = -13;
+    try testz.expectEqual(tn.cpu.a, @as(u8, @bitCast(res)));
+    try testz.expectEqual(tn.cpu.getFlag(.Overflow), true);
+
+    tn.cpu.setFlag(.Carry, true);
+    const res2: i8 = -128;
+    tn.cpu.a = @as(u8, @bitCast(res2));
+    try testz.expectEqual(tn.tickInstruction(), 5);
+    try testz.expectEqual(tn.cpu.a, 127);
+    try testz.expectEqual(tn.cpu.getFlag(.Overflow), false);
+}
