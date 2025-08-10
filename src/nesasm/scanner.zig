@@ -1,0 +1,120 @@
+// A scanner for the assembler.
+
+const std = @import("std");
+const errors = @import("./errors.zig");
+
+// zig fmt: off
+const TokenType = enum {
+    LeftParen, RightParen, Comma, Dot,
+    Comment,
+
+    Identifier, String, Number,
+
+    // Keywords
+
+    NewLine, Eof,
+};
+// zig fmt: on
+
+const TokenValue = union(enum) {
+    number: u16,
+    string: []const u8,
+    none: null,
+};
+
+const Token = struct {
+    type: TokenType,
+    // text: ?[]const u8,
+    value: TokenValue,
+    line: i32,
+};
+
+const Scanner = struct {
+    source: []const u8,
+    alloc: std.mem.Allocator,
+    tokens: std.ArrayList(Token),
+    start: i32,
+    curr: i32,
+    line: i32,
+
+    pub fn init(alloc: std.mem.Allocator, source: []const u8) Scanner {
+        return .{
+            .source = source,
+            .alloc = alloc,
+            .tokens = std.ArrayList(Token).init(alloc),
+            .start = 0,
+            .curr = 0,
+            .line = 0,
+        };
+    }
+
+    pub fn scan(self: *Scanner) std.ArraList(Token) {
+        while (!self.isAtEnd()) {
+            self.start = self.curr;
+            self.scanToken();
+        }
+
+        self.addToken(.Eof, .none);
+        return self.tokens;
+    }
+
+    fn addToken(self: *Scanner, t: TokenType, value: TokenValue) void {
+        self.tokens.append(.{
+            .type = t,
+            .value = value,
+            .line = self.line,
+        }) catch unreachable;
+    }
+
+    fn isAtEnd(self: *Scanner) bool {
+        return self.curr >= self.source.len;
+    }
+
+    fn advance(self: *Scanner) u8 {
+        const c = self.source[self.curr];
+        self.curr += 1;
+        return c;
+    }
+
+    fn peek(self: *Scanner) u8 {
+        if (self.curr >= self.source.len) return 0;
+
+        return self.source[self.curr + 1];
+    }
+
+    fn match(self: *Scanner, expected: u8) bool {
+        if (self.isAtEnd()) return false;
+        if (self.source[self.curr] != expected) return false;
+        self.curr += 1;
+        return true;
+    }
+
+    fn scanToken(self: *Scanner) void {
+        const c = self.advance();
+        switch (c) {
+            // zig fmt: off
+            '(' => { self.addToken(.LeftParen, .none); },
+            ')' => { self.addToken(.RightParen, .none); },
+            ',' => { self.addToken(.Comma, .none); },
+            '.' => { self.addToken(.Dot, .none); },
+
+            // zig fmt: on
+            ';' => {
+                // Consume comments.
+                while (self.peek() != '\n' and !self.isAtEnd()) {
+                    self.advance();
+                }
+            },
+            ' ', '\t' => {
+                // Ignore in-line whitespace.
+            },
+            '\n' => {
+                self.addToken(.NewLine, .none);
+                self.line += 1;
+            },
+            else => {
+                errors.err(self.line, "Unexpected character");
+            },
+        }
+    }
+};
