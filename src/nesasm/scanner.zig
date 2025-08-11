@@ -4,8 +4,8 @@ const std = @import("std");
 const errors = @import("./errors.zig");
 
 // zig fmt: off
-const TokenType = enum {
-    LeftParen, RightParen, Comma, Dot,
+pub const TokenType = enum {
+    LeftParen, RightParen, Comma, Dot, Pound,
     Comment,
 
     Identifier, String, Number,
@@ -16,26 +16,26 @@ const TokenType = enum {
 };
 // zig fmt: on
 
-const TokenValue = union(enum) {
+pub const TokenValue = union(enum) {
     number: u16,
     string: []const u8,
-    none: null,
+    none: u0,
 };
 
-const Token = struct {
+pub const Token = struct {
     type: TokenType,
     // text: ?[]const u8,
     value: TokenValue,
-    line: i32,
+    line: u32,
 };
 
-const Scanner = struct {
+pub const Scanner = struct {
     source: []const u8,
     alloc: std.mem.Allocator,
     tokens: std.ArrayList(Token),
-    start: i32,
-    curr: i32,
-    line: i32,
+    start: u32,
+    curr: u32,
+    line: u32,
 
     pub fn init(alloc: std.mem.Allocator, source: []const u8) Scanner {
         return .{
@@ -48,7 +48,7 @@ const Scanner = struct {
         };
     }
 
-    pub fn scan(self: *Scanner) std.ArraList(Token) {
+    pub fn scan(self: *Scanner) std.ArrayList(Token) {
         while (!self.isAtEnd()) {
             self.start = self.curr;
             self.scanToken();
@@ -93,6 +93,7 @@ const Scanner = struct {
         const c = self.advance();
         switch (c) {
             // zig fmt: off
+            '#' => {self.addToken(.Pound, .none); },
             '(' => { self.addToken(.LeftParen, .none); },
             ')' => { self.addToken(.RightParen, .none); },
             ',' => { self.addToken(.Comma, .none); },
@@ -102,7 +103,7 @@ const Scanner = struct {
             ';' => {
                 // Consume comments.
                 while (self.peek() != '\n' and !self.isAtEnd()) {
-                    self.advance();
+                    _ = self.advance();
                 }
             },
             ' ', '\t' => {

@@ -6,11 +6,11 @@ const ErrorContext = struct {
 
 var errContext: ErrorContext = .{};
 
-pub fn err(line: i32, message: []const u8) void {
+pub fn err(line: u32, message: []const u8) void {
     report(line, "", message);
 }
 
-pub fn report(line: i32, where: []const u8, message: []const u8) void {
+pub fn report(line: u32, where: []const u8, message: []const u8) void {
     std.debug.print("{s}[{}]: {s}\n", .{ where, line, message });
     errContext.hadError = true;
 }
