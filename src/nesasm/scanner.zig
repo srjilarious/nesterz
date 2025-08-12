@@ -77,7 +77,7 @@ pub const Scanner = struct {
     }
 
     fn peek(self: *Scanner) u8 {
-        if (self.curr >= self.source.len) return 0;
+        if (self.curr >= self.source.len - 1) return 0;
 
         return self.source[self.curr + 1];
     }
@@ -87,6 +87,14 @@ pub const Scanner = struct {
         if (self.source[self.curr] != expected) return false;
         self.curr += 1;
         return true;
+    }
+
+    fn scanNumberString(self: *Scanner) []const u8 {
+        while (self.peek() >= '0' and self.peek() <= '9') {
+            _ = self.advance();
+        }
+        _ = self.advance();
+        return self.source[self.start..self.curr];
     }
 
     fn scanToken(self: *Scanner) void {
@@ -112,6 +120,38 @@ pub const Scanner = struct {
             '\n' => {
                 self.addToken(.NewLine, .none);
                 self.line += 1;
+            },
+            'a'...'z', 'A'...'Z', '_' => {
+                // Handle identifiers.
+                while (self.peek() != 0 and (self.peek() >= 'a' and self.peek() <= 'z' or
+                    self.peek() >= 'A' and self.peek() <= 'Z' or
+                    self.peek() >= '0' and self.peek() <= '9' or
+                    self.peek() == '_'))
+                {
+                    _ = self.advance();
+                }
+                const identifier = self.source[self.start..self.curr];
+                self.addToken(.Identifier, .{ .string = identifier });
+            },
+            '0'...'9' => {
+                // Handle numbers.
+                const numStr = self.scanNumberString();
+                if (std.fmt.parseInt(u16, numStr, 10)) |parsed| {
+                    self.addToken(.Number, .{ .number = parsed });
+                } else |_| {
+                    errors.err(self.line, "Invalid number format");
+                }
+            },
+            '$' => {
+                _ = self.advance();
+
+                // Handle numbers.
+                const numStr = self.scanNumberString();
+                if (std.fmt.parseInt(u16, numStr[1..], 16)) |parsed| {
+                    self.addToken(.Number, .{ .number = parsed });
+                } else |_| {
+                    errors.err(self.line, "Invalid number format");
+                }
             },
             else => {
                 errors.err(self.line, "Unexpected character");
