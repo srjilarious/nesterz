@@ -130,6 +130,7 @@ pub const Scanner = struct {
                 {
                     _ = self.advance();
                 }
+                _ = self.advance();
                 const identifier = self.source[self.start..self.curr];
                 self.addToken(.Identifier, .{ .string = identifier });
             },
