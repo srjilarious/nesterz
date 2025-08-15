@@ -6,7 +6,7 @@ const nasm = @import("nesasm");
 const Scanner = nasm.scanner.Scanner;
 const TokenType = nasm.scanner.TokenType;
 
-pub fn scan_test1() !void {
+pub fn scanTest1() !void {
     var scanner = Scanner.init(std.heap.page_allocator, "#()\n");
     const tokens = scanner.scan();
 
@@ -18,7 +18,7 @@ pub fn scan_test1() !void {
     try testz.expectEqual(tokens.items[4].type, .Eof);
 }
 
-pub fn scan_base10_num() !void {
+pub fn scanBase10Num() !void {
     var scanner = Scanner.init(std.heap.page_allocator, "123");
     const tokens = scanner.scan();
 
@@ -28,7 +28,7 @@ pub fn scan_base10_num() !void {
     try testz.expectEqual(tokens.items[1].type, .Eof);
 }
 
-pub fn scan_base16_num() !void {
+pub fn scanBase16Num() !void {
     var scanner = Scanner.init(std.heap.page_allocator, "$20");
     const tokens = scanner.scan();
 
@@ -38,7 +38,7 @@ pub fn scan_base16_num() !void {
     try testz.expectEqual(tokens.items[1].type, .Eof);
 }
 
-pub fn scan_base16_num_lines() !void {
+pub fn scanBase16NumLines() !void {
     var scanner = Scanner.init(std.heap.page_allocator, "$20\n$40\n$ff");
     const tokens = scanner.scan();
 
@@ -56,7 +56,7 @@ pub fn scan_base16_num_lines() !void {
     try testz.expectEqual(tokens.items[5].type, .Eof);
 }
 
-pub fn scan_identifier() !void {
+pub fn scanIdentifier() !void {
     var scanner = Scanner.init(std.heap.page_allocator, "ADC");
     const tokens = scanner.scan();
 
@@ -64,4 +64,15 @@ pub fn scan_identifier() !void {
     try testz.expectEqual(tokens.items[0].type, .Identifier);
     try testz.expectEqualStr(tokens.items[0].value.string, "ADC");
     try testz.expectEqual(tokens.items[1].type, .Eof);
+}
+
+pub fn scanLabel() !void {
+    var scanner = Scanner.init(std.heap.page_allocator, "test:");
+    const tokens = scanner.scan();
+
+    try testz.expectEqual(tokens.items.len, 3);
+    try testz.expectEqual(tokens.items[0].type, .Identifier);
+    try testz.expectEqualStr(tokens.items[0].value.string, "test");
+    try testz.expectEqual(tokens.items[1].type, .Colon);
+    try testz.expectEqual(tokens.items[2].type, .Eof);
 }
