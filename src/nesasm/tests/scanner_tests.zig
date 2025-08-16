@@ -76,3 +76,14 @@ pub fn scanLabel() !void {
     try testz.expectEqual(tokens.items[1].type, .Colon);
     try testz.expectEqual(tokens.items[2].type, .Eof);
 }
+
+pub fn scanLabelAndComment() !void {
+    var scanner = Scanner.init(std.heap.page_allocator, "test: ; Start doing a thing");
+    const tokens = scanner.scan();
+
+    try testz.expectEqual(tokens.items.len, 3);
+    try testz.expectEqual(tokens.items[0].type, .Identifier);
+    try testz.expectEqualStr(tokens.items[0].value.string, "test");
+    try testz.expectEqual(tokens.items[1].type, .Colon);
+    try testz.expectEqual(tokens.items[2].type, .Eof);
+}
