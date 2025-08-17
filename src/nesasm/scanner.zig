@@ -6,7 +6,7 @@ const errors = @import("./errors.zig");
 // zig fmt: off
 pub const TokenType = enum {
     LeftParen, RightParen, Comma, Dot, Pound,
-    Colon,
+    Colon, Equal,
     Comment,
 
     Identifier, String, Number,
@@ -108,6 +108,7 @@ pub const Scanner = struct {
             ',' => { self.addToken(.Comma, .none); },
             '.' => { self.addToken(.Dot, .none); },
             ':' => { self.addToken(.Colon, .none); },
+            '=' => { self.addToken(.Equal, .none); },
             // zig fmt: on
             ';' => {
                 // Consume comments.

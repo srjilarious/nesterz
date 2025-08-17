@@ -87,3 +87,19 @@ pub fn scanLabelAndComment() !void {
     try testz.expectEqual(tokens.items[1].type, .Colon);
     try testz.expectEqual(tokens.items[2].type, .Eof);
 }
+
+pub fn scanSymbol() !void {
+    var scanner = Scanner.init(std.heap.page_allocator, "var  = $ff ; A fancy variable.");
+    const tokens = scanner.scan();
+
+    try testz.expectEqual(tokens.items.len, 4);
+    try testz.expectEqual(tokens.items[0].type, .Identifier);
+    try testz.expectEqualStr(tokens.items[0].value.string, "var");
+
+    try testz.expectEqual(tokens.items[1].type, .Equal);
+
+    try testz.expectEqual(tokens.items[2].type, .Number);
+    try testz.expectEqual(tokens.items[2].value.number, 255);
+
+    try testz.expectEqual(tokens.items[3].type, .Eof);
+}
