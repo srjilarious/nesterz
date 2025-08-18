@@ -103,3 +103,37 @@ pub fn scanSymbol() !void {
 
     try testz.expectEqual(tokens.items[3].type, .Eof);
 }
+
+pub fn scanIteratorTest() !void {
+    var scanner = Scanner.init(std.heap.page_allocator, "LDA #$20\nSTA $2000");
+    _ = scanner.scan();
+    var iter = scanner.iterator();
+
+    var token = iter.next();
+    try testz.expectEqual(token.?.type, .Identifier);
+    try testz.expectEqualStr(token.?.value.string, "LDA");
+
+    token = iter.next();
+    try testz.expectEqual(token.?.type, .Pound);
+
+    token = iter.next();
+    try testz.expectEqual(token.?.type, .Number);
+    try testz.expectEqual(token.?.value.number, 32);
+
+    token = iter.next();
+    try testz.expectEqual(token.?.type, .NewLine);
+
+    token = iter.next();
+    try testz.expectEqual(token.?.type, .Identifier);
+    try testz.expectEqualStr(token.?.value.string, "STA");
+
+    token = iter.next();
+    try testz.expectEqual(token.?.type, .Number);
+    try testz.expectEqual(token.?.value.number, 8192); // $2000 in decimal
+
+    token = iter.next();
+    try testz.expectEqual(token.?.type, .Eof); // End of file
+
+    token = iter.next();
+    try testz.expectEqual(token, null); // End of tokens
+}

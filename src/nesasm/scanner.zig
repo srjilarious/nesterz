@@ -30,6 +30,27 @@ pub const Token = struct {
     line: u32,
 };
 
+pub const TokenIterator = struct {
+    tokens: std.ArrayList(Token),
+    curr: usize,
+
+    pub fn init(tokens: std.ArrayList(Token)) TokenIterator {
+        return .{ .tokens = tokens, .curr = 0 };
+    }
+
+    pub fn next(self: *TokenIterator) ?Token {
+        if (self.curr >= self.tokens.items.len) return null;
+        const token = self.tokens.items[self.curr];
+        self.curr += 1;
+        return token;
+    }
+
+    pub fn peek(self: *TokenIterator) ?Token {
+        if (self.curr >= self.tokens.items.len) return null;
+        return self.tokens.items[self.curr];
+    }
+};
+
 pub const Scanner = struct {
     source: []const u8,
     alloc: std.mem.Allocator,
@@ -160,5 +181,9 @@ pub const Scanner = struct {
                 errors.err(self.line, "Unexpected character");
             },
         }
+    }
+
+    pub fn iterator(self: *Scanner) TokenIterator {
+        return TokenIterator.init(self.tokens);
     }
 };
