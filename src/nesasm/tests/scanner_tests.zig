@@ -113,7 +113,10 @@ pub fn scanIteratorTest() !void {
     try testz.expectEqual(token.?.type, .Identifier);
     try testz.expectEqualStr(token.?.value.string, "LDA");
 
+    // Check peek
+    try testz.expectEqual(iter.peek().?.type, .Pound);
     token = iter.next();
+
     try testz.expectEqual(token.?.type, .Pound);
 
     token = iter.next();
@@ -126,6 +129,9 @@ pub fn scanIteratorTest() !void {
     token = iter.next();
     try testz.expectEqual(token.?.type, .Identifier);
     try testz.expectEqualStr(token.?.value.string, "STA");
+
+    // Check peek again.
+    try testz.expectEqual(iter.peek().?.type, .Number);
 
     token = iter.next();
     try testz.expectEqual(token.?.type, .Number);
