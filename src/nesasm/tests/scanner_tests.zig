@@ -139,7 +139,9 @@ pub fn scanIteratorTest() !void {
 
     token = iter.next();
     try testz.expectEqual(token.?.type, .Eof); // End of file
+    try testz.expectTrue(iter.isEof());
 
     token = iter.next();
     try testz.expectEqual(token, null); // End of tokens
+    try testz.expectTrue(iter.isEof());
 }

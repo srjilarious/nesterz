@@ -49,6 +49,11 @@ pub const TokenIterator = struct {
         if (self.curr >= self.tokens.items.len) return null;
         return self.tokens.items[self.curr];
     }
+
+    pub fn isEof(self: *TokenIterator) bool {
+        return self.curr >= self.tokens.items.len or
+            self.tokens.items[self.curr].type == .Eof;
+    }
 };
 
 pub const Scanner = struct {
