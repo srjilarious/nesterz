@@ -35,7 +35,10 @@ pub const Assembler6502 = struct {
     const Self = @This();
 
     pub fn init(alloc: std.mem.Allocator, source: []const u8) !Assembler6502 {
-        const scan = alloc.create(scanner.Scanner, .{ .alloc = alloc, .source = source });
+        const scan = try alloc.create(scanner.Scanner);
+        scan.* = scanner.Scanner.init(alloc, source);
+        _ = scan.scan();
+
         return .{
             .alloc = alloc,
             .source = source,
@@ -61,16 +64,17 @@ pub const Assembler6502 = struct {
     }
 
     fn parseInstruction(self: *Self, instTok: Token) !Instruction {
-        const op = CpuOp.fromString(instTok.value.string) orelse {
+        const op = nes.emu.cpuOpFromStr(instTok.value.string);
+        if (op == null) {
             // TODO: Handle errors with values here.
             return error.UnknownOp;
-        };
+        }
 
         const t1 = self.tokenIt.next();
         if (t1 == null or t1.?.type == .NewLine or t1.?.type == .Eof) {
             // No operand, just the instruction.
             return Instruction{
-                .op = op,
+                .op = op.?,
                 .addrMode = AddressMode.Implied,
                 .operand = null,
             };
@@ -86,19 +90,19 @@ pub const Assembler6502 = struct {
 
     pub fn parseNextLine(self: *Self) !?AssemblyLine {
         const t1 = self.tokenIt.next();
-        if(t1 == null or t1.?.type == .Eof) return null;
+        if (t1 == null or t1.?.type == .Eof) return null;
 
         if (t1.?.type == .NewLine) {
             self.currLineNo += 1;
             return null; // Skip empty lines
         }
 
-        switch(t1.?.type) {
-            .Identifier => |cmdTok| {
+        switch (t1.?.type) {
+            .Identifier => {
                 const t2 = self.tokenIt.next();
 
                 // Handle standalone instruction.
-                if(t2 == null or t2.?.type == .NewLine or t2.?.type == .Eof) {
+                if (t2 == null or t2.?.type == .NewLine or t2.?.type == .Eof) {
                     const inst = try self.parseInstruction(t1.?);
                     return .{
                         .instr = inst,
@@ -110,29 +114,30 @@ pub const Assembler6502 = struct {
 
                 switch (t2.?.type) {
                     .Colon => {
+                        return error.NotImplemented;
                         // Handle label definition.
-                        const labelName = cmdTok.value.string;
-                        const label = try Label.init(labelName, self.currLineNo, self.currByteOffset, self.alloc);
-                        try self.labels.append(label);
+                        // const labelName = t1.?.value.string;
+                        // const label = try Label.init(labelName, self.currLineNo, self.currByteOffset, self.alloc);
+                        // try self.labels.append(label);
 
-                        const t3 = self.tokenIt.next(); // Consume the colon token.
-                        if(t2 == null or t2.?.type == .NewLine or t2.?.type == .Eof) {
-                            return .{
-                                .instr = null,
-                                .label = label,
-                                .comment = null,
-                                .lineNo = self.currLineNo,
-                            };
-                        }
+                        // const t3 = self.tokenIt.next(); // Consume the colon token.
+                        // if (t2 == null or t2.?.type == .NewLine or t2.?.type == .Eof) {
+                        //     return .{
+                        //         .instr = null,
+                        //         .label = label,
+                        //         .comment = null,
+                        //         .lineNo = self.currLineNo,
+                        //     };
+                        // }
 
-                        // If there's more tokens, we expect an instruction.
-                        const inst = try self.parseInstruction(t3.?);
-                        return .{
-                            .instr = inst,
-                            .label = label,
-                            .comment = null,
-                            .lineNo = self.currLineNo,
-                        };
+                        // // If there's more tokens, we expect an instruction.
+                        // const inst = try self.parseInstruction(t3.?);
+                        // return .{
+                        //     .instr = inst,
+                        //     .label = label,
+                        //     .comment = null,
+                        //     .lineNo = self.currLineNo,
+                        // };
                     },
                     .Equal => {
                         return error.NotImplemented;
@@ -163,17 +168,15 @@ pub const Assembler6502 = struct {
                             .comment = null,
                             .lineNo = self.currLineNo,
                         };
-                    }
-                    else => |nextTok| {
+                    },
+                    else => {
                         return error.UnexpectedTokenType;
                     },
                 }
-               
             },
-            else => |other| {
+            else => {
                 return error.UnexpectedTokenType;
             },
         }
-
     }
 };

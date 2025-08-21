@@ -1,6 +1,7 @@
 const structs = @import("./structs.zig");
 pub const utils = @import("./utils.zig");
 pub const assembler = @import("./assembler.zig");
+pub const assembler2 = @import("./assembler2.zig");
 pub const scanner = @import("./scanner.zig");
 
 const nes = @import("nesterz");
@@ -17,5 +18,6 @@ pub const AssemblyError = structs.AssemblyError;
 pub const AssemblyParseError = structs.AssemblyParseError;
 
 pub const Assembler6502 = assembler.Assembler6502;
+
 pub const getInstFromOp = assembler.getInstFromOp;
 pub const codeGen = assembler.codeGen;

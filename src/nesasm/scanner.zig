@@ -75,6 +75,10 @@ pub const Scanner = struct {
         };
     }
 
+    pub fn deinit(self: *Scanner) void {
+        self.tokens.deinit();
+    }
+
     pub fn scan(self: *Scanner) std.ArrayList(Token) {
         while (!self.isAtEnd()) {
             self.start = self.curr;

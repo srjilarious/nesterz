@@ -32,6 +32,7 @@ const Tests = testz.discoverTests(.{
     testz.Group{ .name = "Assembler Parser", .tag = "asm_parse", .mod = @import("nesasm/tests/parse_tests.zig") },
     testz.Group{ .name = "Assembler Code Gen", .tag = "asm_code_gen", .mod = @import("nesasm/tests/code_gen_tests.zig") },
     testz.Group{ .name = "Assembler Scanner", .tag = "asm_scanner", .mod = @import("nesasm/tests/scanner_tests.zig") },
+    testz.Group{ .name = "Assembler2", .tag = "asm2", .mod = @import("nesasm/tests/assembler2_tests.zig") },
     }, .{});
 
 pub fn main() !void {
