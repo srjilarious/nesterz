@@ -63,14 +63,14 @@ pub const Assembler6502 = struct {
         return self.tokenIt.isEof();
     }
 
-    fn parseInstruction(self: *Self, instTok: Token) !Instruction {
+    fn parseInstruction(self: *Self, instTok: Token, t1: ?Token) !Instruction {
         const op = nes.emu.cpuOpFromStr(instTok.value.string);
         if (op == null) {
             // TODO: Handle errors with values here.
             return error.UnknownOp;
         }
 
-        const t1 = self.tokenIt.next();
+        //const t1 = self.tokenIt.next();
         if (t1 == null or t1.?.type == .NewLine or t1.?.type == .Eof) {
             // No operand, just the instruction.
             return Instruction{
@@ -78,6 +78,46 @@ pub const Assembler6502 = struct {
                 .addrMode = AddressMode.Implied,
                 .operand = null,
             };
+        }
+
+        switch (t1.?.type) {
+            .Number => {
+                // Zero Page or Absolute addressing.
+                const value = t1.?.value.number;
+                if (value <= 255) {
+                    return Instruction{
+                        .op = op.?,
+                        .addrMode = AddressMode.ZeroPage,
+                        .operand = Operand{ .byte = @intCast(value) },
+                    };
+                } else {
+                    return Instruction{
+                        .op = op.?,
+                        .addrMode = AddressMode.Absolute,
+                        .operand = Operand{ .byte = @intCast(value) },
+                    };
+                }
+            },
+            .Pound => {
+                // Immediate value with pound sign.
+                const nextTok = self.tokenIt.next();
+                if (nextTok == null or nextTok.?.type != .Number) {
+                    return error.MissingImmediateValue;
+                }
+                const value = nextTok.?.value.number;
+                if (value > 255) {
+                    return error.OperandTooBig; // Handle operand size limit.
+                }
+                return Instruction{
+                    .op = op.?,
+                    .addrMode = AddressMode.Immediate,
+                    .operand = Operand{ .byte = @intCast(value) },
+                };
+            },
+            else => {
+                // TODO: Handle other address modes...
+                return error.InvalidAddressMode; // TODO: Implement other modes.
+            },
         }
 
         return error.NotImplemented; // TODO: Handle operands.
@@ -103,7 +143,7 @@ pub const Assembler6502 = struct {
 
                 // Handle standalone instruction.
                 if (t2 == null or t2.?.type == .NewLine or t2.?.type == .Eof) {
-                    const inst = try self.parseInstruction(t1.?);
+                    const inst = try self.parseInstruction(t1.?, null);
                     return .{
                         .instr = inst,
                         .label = null,
@@ -161,7 +201,7 @@ pub const Assembler6502 = struct {
                     },
                     .Number, .Pound, .LeftParen, .Identifier => {
                         // Handle instruction with operand.
-                        const inst = try self.parseInstruction(t1.?);
+                        const inst = try self.parseInstruction(t1.?, t2);
                         return .{
                             .instr = inst,
                             .label = null,
