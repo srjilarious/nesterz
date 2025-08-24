@@ -45,3 +45,17 @@ pub fn testInstWithZeroPageAssembly() !void {
     try testz.expectEqual(line.?.instr.?.operand.?.byte, 16);
     try testz.expectTrue(assembler.isEof());
 }
+
+pub fn testInstWithAbsoluteAssembly() !void {
+    const alloc = std.heap.page_allocator;
+    var assembler = try Assembler6502.init(alloc, "ADC $2000");
+    defer assembler.deinit();
+
+    const line = try assembler.parseNextLine();
+    try testz.expectNotEqual(line, null);
+    try testz.expectNotEqual(line.?.instr, null);
+    try testz.expectEqual(line.?.instr.?.op, .ADC);
+    try testz.expectEqual(line.?.instr.?.addrMode, .Absolute);
+    try testz.expectEqual(line.?.instr.?.operand.?.word, 8192);
+    try testz.expectTrue(assembler.isEof());
+}

@@ -94,7 +94,7 @@ pub const Assembler6502 = struct {
                     return Instruction{
                         .op = op.?,
                         .addrMode = AddressMode.Absolute,
-                        .operand = Operand{ .byte = @intCast(value) },
+                        .operand = Operand{ .word = @intCast(value) },
                     };
                 }
             },
