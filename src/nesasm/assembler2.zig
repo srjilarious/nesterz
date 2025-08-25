@@ -85,17 +85,75 @@ pub const Assembler6502 = struct {
                 // Zero Page or Absolute addressing.
                 const value = t1.?.value.number;
                 if (value <= 255) {
-                    return Instruction{
-                        .op = op.?,
-                        .addrMode = AddressMode.ZeroPage,
-                        .operand = Operand{ .byte = @intCast(value) },
-                    };
+                    const t2 = self.tokenIt.peek();
+                    if (t2 == null or t2.?.type == .NewLine or t2.?.type == .Eof) {
+                        // Zero Page addressing.
+                        return Instruction{
+                            .op = op.?,
+                            .addrMode = AddressMode.ZeroPage,
+                            .operand = Operand{ .byte = @intCast(value) },
+                        };
+                    } else if (t2.?.type == .Comma) {
+                        _ = self.tokenIt.next(); // Consume the comma.
+                        const nextTok = self.tokenIt.next();
+                        if (nextTok == null or nextTok.?.type != .Identifier) {
+                            return error.MissingAddressModeValue;
+                        }
+
+                        if (std.ascii.eqlIgnoreCase(nextTok.?.value.string, "X")) {
+                            return Instruction{
+                                .op = op.?,
+                                .addrMode = AddressMode.ZeroPageX,
+                                .operand = Operand{ .byte = @intCast(value) },
+                            };
+                        }
+                        if (std.ascii.eqlIgnoreCase(nextTok.?.value.string, "Y")) {
+                            return Instruction{
+                                .op = op.?,
+                                .addrMode = AddressMode.ZeroPageY,
+                                .operand = Operand{ .byte = @intCast(value) },
+                            };
+                        } else {
+                            return error.InvalidAddressMode; // Invalid address mode.
+                        }
+                    } else {
+                        return error.UnexpectedTokenType; // Unexpected token type.
+                    }
                 } else {
-                    return Instruction{
-                        .op = op.?,
-                        .addrMode = AddressMode.Absolute,
-                        .operand = Operand{ .word = @intCast(value) },
-                    };
+                    const t2 = self.tokenIt.peek();
+                    if (t2 == null or t2.?.type == .NewLine or t2.?.type == .Eof) {
+                        // Zero Page addressing.
+                        return Instruction{
+                            .op = op.?,
+                            .addrMode = AddressMode.Absolute,
+                            .operand = Operand{ .word = @intCast(value) },
+                        };
+                    } else if (t2.?.type == .Comma) {
+                        _ = self.tokenIt.next(); // Consume the comma.
+                        const nextTok = self.tokenIt.next();
+                        if (nextTok == null or nextTok.?.type != .Identifier) {
+                            return error.MissingAddressModeValue;
+                        }
+
+                        if (std.ascii.eqlIgnoreCase(nextTok.?.value.string, "X")) {
+                            return Instruction{
+                                .op = op.?,
+                                .addrMode = AddressMode.AbsoluteX,
+                                .operand = Operand{ .word = @intCast(value) },
+                            };
+                        }
+                        if (std.ascii.eqlIgnoreCase(nextTok.?.value.string, "Y")) {
+                            return Instruction{
+                                .op = op.?,
+                                .addrMode = AddressMode.AbsoluteY,
+                                .operand = Operand{ .word = @intCast(value) },
+                            };
+                        } else {
+                            return error.InvalidAddressMode; // Invalid address mode.
+                        }
+                    } else {
+                        return error.UnexpectedTokenType; // Unexpected token type.
+                    }
                 }
             },
             .Pound => {
