@@ -63,6 +63,31 @@ pub const Assembler6502 = struct {
         return self.tokenIt.isEof();
     }
 
+    fn getOperandValue(self: *Self, tok: Token) !Operand {
+        switch (tok.type) {
+            .Number => {
+                const value = tok.value.number;
+                if (value <= 255) {
+                    return Operand{ .byte = @intCast(value) };
+                } else {
+                    return Operand{ .word = @intCast(value) };
+                }
+            },
+            .Identifier => {
+                const sym = self.symbols.get(tok.value.string);
+                if (sym) |s| {
+                    return s;
+                } else {
+                    return error.UnknownSymbol;
+                }
+            },
+            else => {
+                // Invalid token type for operand, return zero operand for now.
+                return error.InvalidOperandToken;
+            },
+        }
+    }
+
     fn parseInstruction(self: *Self, instTok: Token, t1: ?Token) !Instruction {
         const op = nes.emu.cpuOpFromStr(instTok.value.string);
         if (op == null) {
@@ -171,6 +196,35 @@ pub const Assembler6502 = struct {
                     .addrMode = .Immediate,
                     .operand = Operand{ .byte = @intCast(value) },
                 };
+            },
+            // Handle indirect addressing modes.
+            .LeftParen => {
+                // Need to grab the indirect value.
+                const valueTok = self.tokenIt.next();
+                if (valueTok == null or valueTok.?.type == .NewLine or valueTok.?.type == .Eof) {
+                    return error.MissingIndirectValue;
+                }
+
+                // We expect a value or an identifier here.
+                if (valueTok.?.type != .Number and valueTok.?.type != .Identifier) {
+                    return error.InvalidIndirectValue;
+                }
+
+                const t2 = self.tokenIt.next();
+                if (t2 == null or t2.?.type == .NewLine or t2.?.type == .Eof) {
+                    return error.MissingIndirectParam;
+                }
+
+                const operand = try self.getOperandValue(valueTok.?);
+
+                // Check for indirect addressing mode.
+                if (t2.?.type == .RightParen) {
+                    return .{
+                        .op = op.?,
+                        .addrMode = .Indirect,
+                        .operand = operand,
+                    };
+                }
             },
             .Identifier => {
                 // Check for an accumulator instruction.
