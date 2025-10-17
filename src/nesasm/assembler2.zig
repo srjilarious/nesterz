@@ -75,7 +75,7 @@ pub const Assembler6502 = struct {
             // No operand, just the instruction.
             return Instruction{
                 .op = op.?,
-                .addrMode = AddressMode.Implied,
+                .addrMode = .Implied,
                 .operand = null,
             };
         }
@@ -90,7 +90,7 @@ pub const Assembler6502 = struct {
                         // Zero Page addressing.
                         return Instruction{
                             .op = op.?,
-                            .addrMode = AddressMode.ZeroPage,
+                            .addrMode = .ZeroPage,
                             .operand = Operand{ .byte = @intCast(value) },
                         };
                     } else if (t2.?.type == .Comma) {
@@ -103,14 +103,14 @@ pub const Assembler6502 = struct {
                         if (std.ascii.eqlIgnoreCase(nextTok.?.value.string, "X")) {
                             return Instruction{
                                 .op = op.?,
-                                .addrMode = AddressMode.ZeroPageX,
+                                .addrMode = .ZeroPageX,
                                 .operand = Operand{ .byte = @intCast(value) },
                             };
                         }
                         if (std.ascii.eqlIgnoreCase(nextTok.?.value.string, "Y")) {
                             return Instruction{
                                 .op = op.?,
-                                .addrMode = AddressMode.ZeroPageY,
+                                .addrMode = .ZeroPageY,
                                 .operand = Operand{ .byte = @intCast(value) },
                             };
                         } else {
@@ -125,7 +125,7 @@ pub const Assembler6502 = struct {
                         // Zero Page addressing.
                         return Instruction{
                             .op = op.?,
-                            .addrMode = AddressMode.Absolute,
+                            .addrMode = .Absolute,
                             .operand = Operand{ .word = @intCast(value) },
                         };
                     } else if (t2.?.type == .Comma) {
@@ -138,14 +138,14 @@ pub const Assembler6502 = struct {
                         if (std.ascii.eqlIgnoreCase(nextTok.?.value.string, "X")) {
                             return Instruction{
                                 .op = op.?,
-                                .addrMode = AddressMode.AbsoluteX,
+                                .addrMode = .AbsoluteX,
                                 .operand = Operand{ .word = @intCast(value) },
                             };
                         }
                         if (std.ascii.eqlIgnoreCase(nextTok.?.value.string, "Y")) {
                             return Instruction{
                                 .op = op.?,
-                                .addrMode = AddressMode.AbsoluteY,
+                                .addrMode = .AbsoluteY,
                                 .operand = Operand{ .word = @intCast(value) },
                             };
                         } else {
@@ -168,9 +168,19 @@ pub const Assembler6502 = struct {
                 }
                 return Instruction{
                     .op = op.?,
-                    .addrMode = AddressMode.Immediate,
+                    .addrMode = .Immediate,
                     .operand = Operand{ .byte = @intCast(value) },
                 };
+            },
+            .Identifier => {
+                // Check for an accumulator instruction.
+                if (std.ascii.eqlIgnoreCase(t1.?.value.string, "A")) {
+                    return Instruction{
+                        .op = op.?,
+                        .addrMode = .Accumulator,
+                        .operand = null,
+                    };
+                }
             },
             else => {
                 // TODO: Handle other address modes...
