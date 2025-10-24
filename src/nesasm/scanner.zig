@@ -90,6 +90,7 @@ pub const Scanner = struct {
     }
 
     fn addToken(self: *Scanner, t: TokenType, value: TokenValue) void {
+        // std.debug.print("Adding token: {}: {?}\n", .{ t, value });
         self.tokens.append(.{
             .type = t,
             .value = value,
@@ -108,9 +109,9 @@ pub const Scanner = struct {
     }
 
     fn peek(self: *Scanner) u8 {
-        if (self.curr >= self.source.len - 1) return 0;
+        if (self.curr >= self.source.len) return 0;
 
-        return self.source[self.curr + 1];
+        return self.source[self.curr];
     }
 
     fn match(self: *Scanner, expected: u8) bool {
@@ -121,10 +122,12 @@ pub const Scanner = struct {
     }
 
     fn scanNumberString(self: *Scanner) []const u8 {
-        while (self.peek() >= '0' and self.peek() <= '9') {
+        while ((self.peek() >= '0' and self.peek() <= '9') or
+            (self.peek() >= 'a' and self.peek() <= 'f') or
+            (self.peek() >= 'A' and self.peek() <= 'F'))
+        {
             _ = self.advance();
         }
-        _ = self.advance();
         return self.source[self.start..self.curr];
     }
 
@@ -155,17 +158,17 @@ pub const Scanner = struct {
             },
             'a'...'z', 'A'...'Z', '_' => {
                 // Handle identifiers.
-                while (self.peek() != 0 and (self.peek() >= 'a' and self.peek() <= 'z' or
-                    self.peek() >= 'A' and self.peek() <= 'Z' or
-                    self.peek() >= '0' and self.peek() <= '9' or
+                while (self.peek() != 0 and ((self.peek() >= 'a' and self.peek() <= 'z') or
+                    (self.peek() >= 'A' and self.peek() <= 'Z') or
+                    (self.peek() >= '0' and self.peek() <= '9') or
                     self.peek() == '_'))
                 {
                     _ = self.advance();
                 }
 
-                if (!self.isAtEnd()) {
-                    _ = self.advance();
-                }
+                // if (!self.isAtEnd()) {
+                //     _ = self.advance();
+                // }
 
                 const identifier = self.source[self.start..self.curr];
                 self.addToken(.Identifier, .{ .string = identifier });

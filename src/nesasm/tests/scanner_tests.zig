@@ -38,6 +38,16 @@ pub fn scanBase16Num() !void {
     try testz.expectEqual(tokens.items[1].type, .Eof);
 }
 
+pub fn scanBase16Num_2() !void {
+    var scanner = Scanner.init(std.heap.page_allocator, "$1fa2");
+    const tokens = scanner.scan();
+
+    try testz.expectEqual(tokens.items.len, 2);
+    try testz.expectEqual(tokens.items[0].type, .Number);
+    try testz.expectEqual(tokens.items[0].value.number, 0x1fa2);
+    try testz.expectEqual(tokens.items[1].type, .Eof);
+}
+
 pub fn scanBase16NumLines() !void {
     var scanner = Scanner.init(std.heap.page_allocator, "$20\n$40\n$ff");
     const tokens = scanner.scan();
@@ -144,4 +154,34 @@ pub fn scanIteratorTest() !void {
     token = iter.next();
     try testz.expectEqual(token, null); // End of tokens
     try testz.expectTrue(iter.isEof());
+}
+
+pub fn scanIndirectXTest() !void {
+    var scanner = Scanner.init(std.heap.page_allocator, "ADC ($10,X)");
+    _ = scanner.scan();
+    var iter = scanner.iterator();
+
+    var token = iter.next();
+    try testz.expectEqual(token.?.type, .Identifier);
+    try testz.expectEqualStr(token.?.value.string, "ADC");
+
+    token = iter.next();
+    try testz.expectEqual(token.?.type, .LeftParen);
+
+    token = iter.next();
+    try testz.expectEqual(token.?.type, .Number);
+    try testz.expectEqual(token.?.value.number, 16);
+
+    token = iter.next();
+    try testz.expectEqual(token.?.type, .Comma);
+
+    token = iter.next();
+    try testz.expectEqual(token.?.type, .Identifier);
+    try testz.expectEqualStr(token.?.value.string, "X");
+
+    token = iter.next();
+    try testz.expectEqual(token.?.type, .RightParen);
+
+    token = iter.next();
+    try testz.expectEqual(token.?.type, .Eof);
 }
