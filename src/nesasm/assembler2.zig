@@ -219,11 +219,46 @@ pub const Assembler6502 = struct {
 
                 // Check for indirect addressing mode.
                 if (t2.?.type == .RightParen) {
+                    // Indirect addressing.
                     return .{
                         .op = op.?,
                         .addrMode = .Indirect,
                         .operand = operand,
                     };
+                    // Check for a comma next for indirect Y.
+                } else if (t2.?.type == .Comma) {
+                    // Expect an X here.
+                    const t3 = self.tokenIt.next();
+                    if (t3 == null or t3.?.type != .Identifier) {
+                        return error.MissingAddressModeValue;
+                    }
+
+                    // Inirect X addressing mode.
+                    if (std.ascii.eqlIgnoreCase(t3.?.value.string, "X")) {
+                        const t4 = self.tokenIt.peek();
+                        if (t4 == null or t4.?.type == .NewLine or t4.?.type != .RightParen) {
+                            // Missing closing paren.
+                            return error.MissingClosingParen;
+                        }
+
+                        // Consume the closing paren.
+                        _ = self.tokenIt.next();
+
+                        // Make sure the operand is a byte value.
+                        switch (operand) {
+                            .byte => |_| {},
+                            .word => |_| {
+                                // Operand too big for Indirect X.
+                                return error.OperandTooBig;
+                            },
+                        }
+
+                        return .{
+                            .op = op.?,
+                            .addrMode = .IndirectX,
+                            .operand = operand,
+                        };
+                    }
                 }
             },
             .Identifier => {

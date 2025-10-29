@@ -143,3 +143,17 @@ pub fn testInstWithIndirectAssembly() !void {
     try testz.expectEqual(line.?.instr.?.operand.?.word, 8192);
     try testz.expectTrue(assembler.isEof());
 }
+
+pub fn testInstWithIndirectXAssembly() !void {
+    const alloc = std.heap.page_allocator;
+    var assembler = try Assembler6502.init(alloc, "ADC ($10,X)");
+    defer assembler.deinit();
+
+    const line = try assembler.parseNextLine();
+    try testz.expectNotEqual(line, null);
+    try testz.expectNotEqual(line.?.instr, null);
+    try testz.expectEqual(line.?.instr.?.op, .ADC);
+    try testz.expectEqual(line.?.instr.?.addrMode, .IndirectX);
+    try testz.expectEqual(line.?.instr.?.operand.?.byte, 16);
+    try testz.expectTrue(assembler.isEof());
+}
