@@ -42,9 +42,9 @@ pub const Assembler6502 = struct {
         return .{
             .alloc = alloc,
             .source = source,
-            .labels = std.ArrayList(Label).init(alloc),
+            .labels = .{},
             .symbols = std.StringHashMap(Operand).init(alloc),
-            .lines = std.ArrayList(AssemblyLine).init(alloc),
+            .lines = .{},
             .currLineNo = 0,
             .currByteOffset = 0,
             .scanner = scan,
@@ -54,9 +54,9 @@ pub const Assembler6502 = struct {
 
     pub fn deinit(self: *Assembler6502) void {
         self.scanner.deinit();
-        self.labels.deinit();
+        self.labels.deinit(self.alloc);
         self.symbols.deinit();
-        self.lines.deinit();
+        self.lines.deinit(self.alloc);
     }
 
     pub fn isEof(self: *Self) bool {

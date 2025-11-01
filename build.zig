@@ -17,12 +17,14 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     const exe = b.addExecutable(.{
-        .name = "nesterz",
-        // In this case the main source file is merely a path, however, in more
-        // complicated build scripts, this could be a generated file.
-        .root_source_file = b.path("src/unit_tests_main.zig"),
-        .target = target,
-        .optimize = optimize,
+        .name = "tests",
+        .root_module = b.createModule(.{
+            // In this case the main source file is merely a path, however, in more
+            // complicated build scripts, this could be a generated file.
+            .root_source_file = b.path("src/unit_tests_main.zig"),
+            .target = target,
+            .optimize = optimize,
+         }),
     });
 
     const nesterz = b.addModule("nesterz", .{ 

@@ -68,7 +68,7 @@ pub const Scanner = struct {
         return .{
             .source = source,
             .alloc = alloc,
-            .tokens = std.ArrayList(Token).init(alloc),
+            .tokens = .{},
             .start = 0,
             .curr = 0,
             .line = 0,
@@ -76,7 +76,7 @@ pub const Scanner = struct {
     }
 
     pub fn deinit(self: *Scanner) void {
-        self.tokens.deinit();
+        self.tokens.deinit(self.alloc);
     }
 
     pub fn scan(self: *Scanner) std.ArrayList(Token) {
@@ -91,7 +91,7 @@ pub const Scanner = struct {
 
     fn addToken(self: *Scanner, t: TokenType, value: TokenValue) void {
         // std.debug.print("Adding token: {}: {?}\n", .{ t, value });
-        self.tokens.append(.{
+        self.tokens.append(self.alloc, .{
             .type = t,
             .value = value,
             .line = self.line,

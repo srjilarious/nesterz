@@ -218,9 +218,9 @@ pub const Assembler6502 = struct {
     pub fn init(alloc: std.mem.Allocator) !Assembler6502 {
         return .{
             .alloc = alloc,
-            .labels = std.ArrayList(Label).init(alloc),
+            .labels = .{},
             .symbols = std.StringHashMap(Operand).init(alloc),
-            .lines = std.ArrayList(AssemblyLine).init(alloc),
+            .lines = .{},
             .currLineNo = 0,
             .currByteOffset = 0
         };
@@ -228,9 +228,9 @@ pub const Assembler6502 = struct {
 
     pub fn deinit(self: *Assembler6502) void {
         // TODO: implement
-        self.labels.deinit();
+        self.labels.deinit(self.alloc);
         self.symbols.deinit();
-        self.lines.deinit();
+        self.lines.deinit(self.alloc);
     }
 
     // fn parseOperand()
