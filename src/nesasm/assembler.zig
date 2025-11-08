@@ -71,7 +71,7 @@ pub fn codeGen(op:CpuOp, addrOp: AddrOp, buff: *[4]u8) ?[]u8 {
                 }
             }
         },
-        .Absolute => {
+        .Absolute, .AbsoluteX, .AbsoluteY => {
             // Must have an operand to be valid.
             if(addrOp.operand == null) {
                 // TODO: Add in error handling w/ messages..

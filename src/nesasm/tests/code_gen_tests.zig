@@ -141,3 +141,21 @@ pub fn genAbsoluteInstructions() !void {
     try checkCodeGen(.STX, .Absolute, .{ .word = 0x30DD }, &[_]u8{ 0x8E, 0xDD, 0x30 });
     try checkCodeGen(.STY, .Absolute, .{ .word = 0x30EE }, &[_]u8{ 0x8C, 0xEE, 0x30 });
 }
+
+pub fn genAbsoluteXInstructions() !void {
+    try checkCodeGen(.ADC, .AbsoluteX, .{ .word = 0x3010 }, &[_]u8{ 0x7D, 0x10, 0x30 });
+    try checkCodeGen(.AND, .AbsoluteX, .{ .word = 0x3020 }, &[_]u8{ 0x3D, 0x20, 0x30 });
+    try checkCodeGen(.ASL, .AbsoluteX, .{ .word = 0x3025 }, &[_]u8{ 0x1E, 0x25, 0x30 });
+    try checkCodeGen(.CMP, .AbsoluteX, .{ .word = 0x3030 }, &[_]u8{ 0xDD, 0x30, 0x30 });
+    try checkCodeGen(.DEC, .AbsoluteX, .{ .word = 0x3055 }, &[_]u8{ 0xDE, 0x55, 0x30 });
+    try checkCodeGen(.EOR, .AbsoluteX, .{ .word = 0x3060 }, &[_]u8{ 0x5D, 0x60, 0x30 });
+    try checkCodeGen(.INC, .AbsoluteX, .{ .word = 0x3065 }, &[_]u8{ 0xFE, 0x65, 0x30 });
+    try checkCodeGen(.LDA, .AbsoluteX, .{ .word = 0x3070 }, &[_]u8{ 0xBD, 0x70, 0x30 });
+    try checkCodeGen(.LDY, .AbsoluteX, .{ .word = 0x3099 }, &[_]u8{ 0xBC, 0x99, 0x30 });
+    try checkCodeGen(.LSR, .AbsoluteX, .{ .word = 0x309D }, &[_]u8{ 0x5E, 0x9D, 0x30 });
+    try checkCodeGen(.ORA, .AbsoluteX, .{ .word = 0x30AA }, &[_]u8{ 0x1D, 0xAA, 0x30 });
+    try checkCodeGen(.ROL, .AbsoluteX, .{ .word = 0x30AB }, &[_]u8{ 0x3E, 0xAB, 0x30 });
+    try checkCodeGen(.ROR, .AbsoluteX, .{ .word = 0x30AC }, &[_]u8{ 0x7E, 0xAC, 0x30 });
+    try checkCodeGen(.SBC, .AbsoluteX, .{ .word = 0x30BB }, &[_]u8{ 0xFD, 0xBB, 0x30 });
+    try checkCodeGen(.STA, .AbsoluteX, .{ .word = 0x30CC }, &[_]u8{ 0x9D, 0xCC, 0x30 });
+}
