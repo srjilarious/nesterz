@@ -1,6 +1,6 @@
 const structs = @import("./structs.zig");
 pub const utils = @import("./utils.zig");
-pub const assembler = @import("./assembler.zig");
+pub const core = @import("./core.zig");
 pub const assembler2 = @import("./assembler2.zig");
 pub const scanner = @import("./scanner.zig");
 
@@ -17,7 +17,5 @@ pub const AssemblyLine = structs.AssemblyLine;
 pub const AssemblyError = structs.AssemblyError;
 pub const AssemblyParseError = structs.AssemblyParseError;
 
-pub const Assembler6502 = assembler.Assembler6502;
-
-pub const getInstFromOp = assembler.getInstFromOp;
-pub const codeGen = assembler.codeGen;
+pub const getInstFromOp = core.getInstFromOp;
+pub const codeGen = core.codeGen;

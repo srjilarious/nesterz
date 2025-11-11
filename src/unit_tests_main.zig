@@ -29,10 +29,9 @@ const Tests = testz.discoverTests(.{
 
     // Assembler tests
     testz.Group{ .name = "Assembler Utils", .tag = "asm_utils", .mod = @import("nesasm/tests/utils_tests.zig") },
-    testz.Group{ .name = "Assembler Parser", .tag = "asm_parse", .mod = @import("nesasm/tests/parse_tests.zig") },
     testz.Group{ .name = "Assembler Code Gen", .tag = "asm_code_gen", .mod = @import("nesasm/tests/code_gen_tests.zig") },
     testz.Group{ .name = "Assembler Scanner", .tag = "asm_scanner", .mod = @import("nesasm/tests/scanner_tests.zig") },
-    testz.Group{ .name = "Assembler2", .tag = "asm2", .mod = @import("nesasm/tests/assembler2_tests.zig") },
+    testz.Group{ .name = "Assembler", .tag = "asm", .mod = @import("nesasm/tests/assembler_tests.zig") },
     }, .{});
 
 pub fn main() !void {
