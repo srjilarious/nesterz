@@ -171,3 +171,7 @@ pub fn genAbsoluteYInstructions() !void {
     try checkCodeGen(.SBC, .AbsoluteY, .{ .word = 0x30BB }, &[_]u8{ 0xF9, 0xBB, 0x30 });
     try checkCodeGen(.STA, .AbsoluteY, .{ .word = 0x30CC }, &[_]u8{ 0x99, 0xCC, 0x30 });
 }
+
+pub fn getIndirectInstructions() !void {
+    try checkCodeGen(.JMP, .Indirect, .{ .word = 0x3010 }, &[_]u8{ 0x6C, 0x10, 0x30 });
+}
