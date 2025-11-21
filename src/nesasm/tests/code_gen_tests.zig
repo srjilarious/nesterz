@@ -175,3 +175,14 @@ pub fn genAbsoluteYInstructions() !void {
 pub fn getIndirectInstructions() !void {
     try checkCodeGen(.JMP, .Indirect, .{ .word = 0x3010 }, &[_]u8{ 0x6C, 0x10, 0x30 });
 }
+
+pub fn genIndirectXInstructions() !void {
+    try checkCodeGen(.ADC, .IndirectX, .{ .byte = 0x10 }, &[_]u8{ 0x61, 0x10 });
+    try checkCodeGen(.AND, .IndirectX, .{ .byte = 0x20 }, &[_]u8{ 0x21, 0x20 });
+    try checkCodeGen(.CMP, .IndirectX, .{ .byte = 0x30 }, &[_]u8{ 0xC1, 0x30 });
+    try checkCodeGen(.EOR, .IndirectX, .{ .byte = 0x60 }, &[_]u8{ 0x41, 0x60 });
+    try checkCodeGen(.LDA, .IndirectX, .{ .byte = 0x70 }, &[_]u8{ 0xA1, 0x70 });
+    try checkCodeGen(.ORA, .IndirectX, .{ .byte = 0xAA }, &[_]u8{ 0x01, 0xAA });
+    try checkCodeGen(.SBC, .IndirectX, .{ .byte = 0xBB }, &[_]u8{ 0xE1, 0xBB });
+    try checkCodeGen(.STA, .IndirectX, .{ .byte = 0xCC }, &[_]u8{ 0x81, 0xCC });
+}
