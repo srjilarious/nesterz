@@ -41,7 +41,9 @@ pub fn codeGen(op: CpuOp, addrOp: AddrOp, buff: *[4]u8) ?[]u8 {
 
     // var buffv = &buff;
     switch (addrOp.addr) {
-        .Implied, .Accumulator => {
+        .Implied,
+        .Accumulator,
+        => {
             if (addrOp.operand != null) {
                 // TODO: Add in error handling w/ messages..
                 return null;
@@ -49,7 +51,14 @@ pub fn codeGen(op: CpuOp, addrOp: AddrOp, buff: *[4]u8) ?[]u8 {
             buff.* = .{ inst.?.opCode, 0, 0, 0 };
             return buff[0..1];
         },
-        .Immediate, .ZeroPage, .ZeroPageX, .ZeroPageY, .Relative, .IndirectX => {
+        .Immediate,
+        .ZeroPage,
+        .ZeroPageX,
+        .ZeroPageY,
+        .Relative,
+        .IndirectX,
+        .IndirectY,
+        => {
             // Must have an operand to be valid.
             if (addrOp.operand == null) {
                 // TODO: Add in error handling w/ messages..
@@ -67,7 +76,11 @@ pub fn codeGen(op: CpuOp, addrOp: AddrOp, buff: *[4]u8) ?[]u8 {
                 },
             }
         },
-        .Absolute, .AbsoluteX, .AbsoluteY, .Indirect => {
+        .Absolute,
+        .AbsoluteX,
+        .AbsoluteY,
+        .Indirect,
+        => {
             // Must have an operand to be valid.
             if (addrOp.operand == null) {
                 // TODO: Add in error handling w/ messages..
@@ -84,9 +97,6 @@ pub fn codeGen(op: CpuOp, addrOp: AddrOp, buff: *[4]u8) ?[]u8 {
                     return buff[0..3];
                 },
             }
-        },
-        else => {
-            @panic("Not implemented yet!");
         },
     }
 }

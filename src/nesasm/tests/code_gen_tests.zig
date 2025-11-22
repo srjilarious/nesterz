@@ -186,3 +186,14 @@ pub fn genIndirectXInstructions() !void {
     try checkCodeGen(.SBC, .IndirectX, .{ .byte = 0xBB }, &[_]u8{ 0xE1, 0xBB });
     try checkCodeGen(.STA, .IndirectX, .{ .byte = 0xCC }, &[_]u8{ 0x81, 0xCC });
 }
+
+pub fn genIndirectYInstructions() !void {
+    try checkCodeGen(.ADC, .IndirectY, .{ .byte = 0x10 }, &[_]u8{ 0x71, 0x10 });
+    try checkCodeGen(.AND, .IndirectY, .{ .byte = 0x20 }, &[_]u8{ 0x31, 0x20 });
+    try checkCodeGen(.CMP, .IndirectY, .{ .byte = 0x30 }, &[_]u8{ 0xD1, 0x30 });
+    try checkCodeGen(.EOR, .IndirectY, .{ .byte = 0x60 }, &[_]u8{ 0x51, 0x60 });
+    try checkCodeGen(.LDA, .IndirectY, .{ .byte = 0x70 }, &[_]u8{ 0xB1, 0x70 });
+    try checkCodeGen(.ORA, .IndirectY, .{ .byte = 0xAA }, &[_]u8{ 0x11, 0xAA });
+    try checkCodeGen(.SBC, .IndirectY, .{ .byte = 0xBB }, &[_]u8{ 0xF1, 0xBB });
+    try checkCodeGen(.STA, .IndirectY, .{ .byte = 0xCC }, &[_]u8{ 0x91, 0xCC });
+}
