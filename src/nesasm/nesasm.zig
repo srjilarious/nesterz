@@ -1,7 +1,7 @@
 const structs = @import("./structs.zig");
 pub const utils = @import("./utils.zig");
 pub const core = @import("./core.zig");
-pub const assembler2 = @import("./assembler2.zig");
+pub const assembler = @import("./assembler.zig");
 pub const scanner = @import("./scanner.zig");
 
 const nes = @import("nesterz");

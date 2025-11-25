@@ -2,7 +2,7 @@ const std = @import("std");
 const testz = @import("testz");
 const nes = @import("nesterz");
 const nasm = @import("nesasm");
-const Assembler6502 = nasm.assembler2.Assembler6502;
+const Assembler6502 = nasm.assembler.Assembler6502;
 const AssemblyLine = nasm.AssemblyLine;
 const CpuOp = nasm.CpuOp;
 
