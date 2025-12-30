@@ -1,4 +1,3 @@
-// zig fmt: off
 const std = @import("std");
 
 // Although this function looks imperative, note that its job is to
@@ -24,16 +23,12 @@ pub fn build(b: *std.Build) void {
             .root_source_file = b.path("src/unit_tests_main.zig"),
             .target = target,
             .optimize = optimize,
-         }),
+        }),
     });
 
-    const nesterz = b.addModule("nesterz", .{ 
-        .root_source_file = b.path("src/nesterz/nesterz.zig")
-    });
+    const nesterz = b.addModule("nesterz", .{ .root_source_file = b.path("src/nesterz/nesterz.zig") });
 
-    const nesasm = b.addModule("nesasm", .{
-        .root_source_file = b.path("src/nesasm/nesasm.zig")
-    });
+    const nesasm = b.addModule("nesasm", .{ .root_source_file = b.path("src/nesasm/nesasm.zig") });
     nesasm.addImport("nesterz", nesterz);
 
     const testz = b.dependency("testz", .{

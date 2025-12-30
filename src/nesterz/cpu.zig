@@ -1,4 +1,3 @@
-// zig fmt: off
 const std = @import("std");
 const emu = @import("./emu.zig");
 
@@ -21,7 +20,11 @@ fn subtract(minuend: u8, subtrahend: u8, carry: bool) SubResult {
     const res: u16 = minuend +% ~subtrahend +% @intFromBool(carry);
     const val: u8 = @intCast(res);
     const overflow = (minuend ^ val) & (subtrahend ^ val) & 0x80 != 0;
-    return .{ .val = val, .carry = (res & 0x100) != 0, .overflow = overflow };
+    return .{
+        .val = val,
+        .carry = (res & 0x100) != 0,
+        .overflow = overflow,
+    };
 }
 
 pub const Cpu6502 = struct {
@@ -75,31 +78,28 @@ pub const Cpu6502 = struct {
 
     pub fn tick(self: *Cpu6502) void {
         self.shouldFetch = true;
-        switch(self.procState) {
+        switch (self.procState) {
             CpuState.Startup => {
-                if(self.currCycle == 0) {
+                if (self.currCycle == 0) {
                     self.pc = 0xfffe;
                     self.currCycle += 1;
-                }
-                else if(self.currCycle == 1) {
+                } else if (self.currCycle == 1) {
                     self.internalAddr = @as(u16, self.dataBus);
                     self.currCycle += 1;
-                }
-                else if(self.currCycle == 2) {
+                } else if (self.currCycle == 2) {
                     self.internalAddr |= @as(u16, self.dataBus) << 8;
                     self.pc = self.internalAddr;
                     self.procState = CpuState.Normal;
                     self.currCycle = 0;
                 }
-                
+
                 self.fetchNext();
             },
             CpuState.Normal => {
-                if(self.currCycle == 0) {
+                if (self.currCycle == 0) {
                     self.currInst = Instruction.fromOpCode(self.dataBus) catch {
                         std.debug.print("Unknown op code: 0x{x}", .{self.dataBus});
                         @panic("Bad op code");
-
                     };
                     self.cyclesLeft = self.currInst.numCycles;
                 }
@@ -108,24 +108,24 @@ pub const Cpu6502 = struct {
                 self.busState = ReadWriteState.HighImpedance;
 
                 self.handleAdressMode();
-                if(self.isOnExecCycle() or emu.isStack(self.currInst.op)) {
+                if (self.isOnExecCycle() or emu.isStack(self.currInst.op)) {
                     self.handleInstExec();
                 }
 
                 self.currCycle += 1;
                 self.cyclesLeft -= 1;
-                
-                if(self.cyclesLeft == 0) {
+
+                if (self.cyclesLeft == 0) {
                     self.currCycle = 0;
                 }
 
-                if(self.shouldFetch) {
+                if (self.shouldFetch) {
                     self.fetchNext();
                 }
             },
             CpuState.Halted => {
                 // Do nothing.
-            }
+            },
         }
     }
 
@@ -142,20 +142,19 @@ pub const Cpu6502 = struct {
     }
 
     fn handleAdressMode(self: *Cpu6502) void {
-        switch(self.currInst.mode) {
+        switch (self.currInst.mode) {
             .Accumulator => {
-                if(self.currCycle == 0) {
+                if (self.currCycle == 0) {
                     self.workingVal = @as(u16, self.a);
                     self.shouldFetch = false;
-                } else if(self.currCycle == 1) {
+                } else if (self.currCycle == 1) {
                     self.a = @truncate(self.workingVal);
-                }
-                else {
+                } else {
                     @panic("Unexpected cycle!");
                 }
             },
             .Implied => {
-                if(self.currCycle < self.currInst.numCycles - 1) {
+                if (self.currCycle < self.currInst.numCycles - 1) {
                     self.shouldFetch = false;
                 }
             },
@@ -163,21 +162,19 @@ pub const Cpu6502 = struct {
                 self.workingVal = @as(u16, self.dataBus);
             },
             .ZeroPage => {
-                if(self.currCycle == 1) {
+                if (self.currCycle == 1) {
                     self.shouldFetch = false;
                     self.internalAddr = self.dataBus;
-                    if(!emu.isStore(self.currInst.op)) {
+                    if (!emu.isStore(self.currInst.op)) {
                         self.addrBus = @as(u16, self.dataBus);
                         self.busState = ReadWriteState.Read;
                     }
-                }
-                else if(self.currCycle == 2) {
+                } else if (self.currCycle == 2) {
                     self.workingVal = self.dataBus;
-                    if(emu.storesBackValue(self.currInst.op)) {
+                    if (emu.storesBackValue(self.currInst.op)) {
                         self.shouldFetch = false;
                     }
-                }
-                else if(self.currCycle == 3) {
+                } else if (self.currCycle == 3) {
                     self.shouldFetch = false;
                     self.addrBus = self.internalAddr;
                     self.dataBus = @truncate(self.workingVal);
@@ -185,58 +182,51 @@ pub const Cpu6502 = struct {
                 }
             },
             .ZeroPageX, .ZeroPageY => {
-                if(self.currCycle == 1) {
+                if (self.currCycle == 1) {
                     self.shouldFetch = false;
                     self.internalAddr = self.dataBus;
-                }
-                else if(self.currCycle == 2) {
+                } else if (self.currCycle == 2) {
                     self.shouldFetch = false;
 
-                    if(self.currInst.mode == .ZeroPageX) {
+                    if (self.currInst.mode == .ZeroPageX) {
                         self.internalAddr = (self.internalAddr +% @as(u16, self.x)) & 0xff;
-                    }
-                    else {
+                    } else {
                         self.internalAddr = (self.internalAddr +% @as(u16, self.y)) & 0xff;
                     }
 
                     self.addrBus = self.internalAddr;
                     self.busState = ReadWriteState.Read;
-                }
-                else if(self.currCycle == 3) {
+                } else if (self.currCycle == 3) {
                     self.workingVal = @intCast(self.dataBus);
-                    if(emu.storesBackValue(self.currInst.op)) {
+                    if (emu.storesBackValue(self.currInst.op)) {
                         self.shouldFetch = false;
                     }
-                }
-                else if(self.currCycle == 4) {
+                } else if (self.currCycle == 4) {
                     self.shouldFetch = false;
                     self.addrBus = self.internalAddr;
                     self.dataBus = @truncate(self.workingVal);
                     self.busState = ReadWriteState.Write;
                 }
-                
             },
             .Absolute => {
-                if(self.currCycle == 1) {
+                if (self.currCycle == 1) {
                     self.internalAddr = @intCast(self.dataBus);
-                } 
-                else if(self.currCycle == 2) {
+                } else if (self.currCycle == 2) {
                     self.internalAddr |= @as(u16, self.dataBus) << 8;
 
                     self.addrBus = self.internalAddr;
                     self.busState = ReadWriteState.Read;
                     self.shouldFetch = false;
-                } 
-                else if(self.currCycle == 3) {
+                } else if (self.currCycle == 3) {
                     self.workingVal = @intCast(self.dataBus);
-                    if(emu.storesBackValue(self.currInst.op)) {
+                    if (emu.storesBackValue(self.currInst.op)) {
                         self.shouldFetch = false;
                     }
                 }
                 // If we are on cycle 5 of an absolute addr instruction
                 // it means we're storing a result back to the memory
                 // location.
-                else if(self.currCycle == 4) {
+                else if (self.currCycle == 4) {
                     self.shouldFetch = false;
                     self.addrBus = self.internalAddr;
                     self.dataBus = @as(u8, @truncate(self.workingVal));
@@ -244,116 +234,103 @@ pub const Cpu6502 = struct {
                 }
             },
             .AbsoluteX, .AbsoluteY => {
-                if(self.currCycle == 1) {
+                if (self.currCycle == 1) {
                     self.internalAddr = @intCast(self.dataBus);
-                } 
-                else if(self.currCycle == 2) {
+                } else if (self.currCycle == 2) {
                     self.internalAddr |= @as(u16, self.dataBus) << 8;
 
-                    if(self.currInst.mode == .AbsoluteX) {
+                    if (self.currInst.mode == .AbsoluteX) {
                         self.internalAddr = (self.internalAddr +% @as(u16, self.x));
-                    }
-                    else {
+                    } else {
                         self.internalAddr = (self.internalAddr +% @as(u16, self.y));
                     }
 
                     self.addrBus = self.internalAddr;
                     self.busState = ReadWriteState.Read;
                     self.shouldFetch = false;
-                } 
-                else if(self.currCycle == 3) {
+                } else if (self.currCycle == 3) {
                     self.workingVal = @intCast(self.dataBus);
-                    if(emu.storesBackValue(self.currInst.op)) {
+                    if (emu.storesBackValue(self.currInst.op)) {
                         self.shouldFetch = false;
                     }
                 }
                 // If we are on cycle 5 of an absolute addr instruction
                 // it means we're storing a result back to the memory
                 // location.
-                else if(self.currCycle == 4) {
-                    if(!emu.isStore(self.currInst.op)) {
+                else if (self.currCycle == 4) {
+                    if (!emu.isStore(self.currInst.op)) {
                         self.shouldFetch = false;
                         self.addrBus = self.internalAddr;
                         self.dataBus = @as(u8, @truncate(self.workingVal));
                         self.busState = ReadWriteState.Write;
                     }
-                }
-                else if(self.currCycle == 5) {
+                } else if (self.currCycle == 5) {
                     self.shouldFetch = false;
                 }
             },
             .Relative => {
-                if(self.currCycle == 1) {
+                if (self.currCycle == 1) {
                     self.internalAddr = @intCast(self.dataBus);
                 }
             },
             .Indirect => {
-                if(self.currCycle == 1) {
+                if (self.currCycle == 1) {
                     self.internalAddr = @intCast(self.dataBus);
-                }
-                else if(self.currCycle == 2) {
+                } else if (self.currCycle == 2) {
                     self.internalAddr = ((@as(u16, @intCast(self.dataBus)) << 8)) | self.internalAddr;
                     self.addrBus = self.internalAddr;
                     self.shouldFetch = false;
                     self.busState = .Read;
-                }
-                else if(self.currCycle == 3) {
+                } else if (self.currCycle == 3) {
                     self.workingVal = @intCast(self.dataBus);
                     self.addrBus +%= 1;
                     self.shouldFetch = false;
                     self.busState = .Read;
-                }
-                else if(self.currCycle == 4) {
+                } else if (self.currCycle == 4) {
                     self.internalAddr = ((@as(u16, @intCast(self.dataBus)) << 8)) | self.workingVal;
                 }
             },
             .IndirectX => {
-                if(self.currCycle == 1) {
+                if (self.currCycle == 1) {
                     const lower = self.dataBus +% self.x;
                     self.addrBus = @intCast(lower);
                     self.shouldFetch = false;
                     self.busState = .Read;
-                }
-                else if(self.currCycle == 2) {
+                } else if (self.currCycle == 2) {
                     self.internalAddr = @intCast(self.dataBus);
                     self.addrBus +%= 1;
                     self.shouldFetch = false;
                     self.busState = .Read;
-                }
-                else if(self.currCycle == 3) {
+                } else if (self.currCycle == 3) {
                     self.internalAddr = ((@as(u16, @intCast(self.dataBus)) << 8)) | self.internalAddr;
                     self.addrBus = self.internalAddr;
                     self.shouldFetch = false;
                     self.busState = .Read;
-                }
-                else if(self.currCycle == 4) {
+                } else if (self.currCycle == 4) {
                     self.workingVal = @intCast(self.dataBus);
                     self.shouldFetch = false;
                 }
             },
             .IndirectY => {
-                if(self.currCycle == 1) {
+                if (self.currCycle == 1) {
                     self.addrBus = @intCast(self.dataBus);
                     self.shouldFetch = false;
                     self.busState = .Read;
-                }
-                else if(self.currCycle == 2) {
+                } else if (self.currCycle == 2) {
                     self.internalAddr = @intCast(self.dataBus);
                     self.addrBus +%= 1;
                     self.shouldFetch = false;
                     self.busState = .Read;
-                }
-                else if(self.currCycle == 3) {
+                } else if (self.currCycle == 3) {
                     self.internalAddr = ((@as(u16, @intCast(self.dataBus)) << 8)) | self.internalAddr;
 
                     // Add the Y register to the internal address as well.
                     self.internalAddr = self.internalAddr + @as(u16, self.y);
-                    
+
                     self.addrBus = self.internalAddr;
                     self.shouldFetch = false;
                     self.busState = .Read;
-                }
-                else if(self.currCycle == 4) {
+                } else if (self.currCycle == 4) {
                     self.workingVal = @intCast(self.dataBus);
                     // self.shouldFetch = false;
                 }
@@ -362,14 +339,14 @@ pub const Cpu6502 = struct {
     }
 
     fn isOnExecCycle(self: *Cpu6502) bool {
-        if(emu.isStore(self.currInst.op)) {
+        if (emu.isStore(self.currInst.op)) {
             return self.currCycle == self.currInst.numCycles - 2;
         }
 
-        return switch(self.currInst.mode) {
+        return switch (self.currInst.mode) {
             AddressMode.Accumulator => self.currCycle == 0,
             AddressMode.Implied => {
-                return switch(self.currInst.op) {
+                return switch (self.currInst.op) {
                     CpuOp.RTS, CpuOp.RTI, CpuOp.BRK => self.currCycle >= 1,
                     // CpuOp.RTI=> self.currCycle >= 1,
                     // CpuOp.BRK => self.currCycle >= 1,
@@ -381,8 +358,8 @@ pub const Cpu6502 = struct {
             AddressMode.ZeroPageX, AddressMode.ZeroPageY => self.currCycle == 3,
             AddressMode.Relative => self.currCycle == 1,
             AddressMode.Absolute => {
-                return switch(self.currInst.op) {
-                    CpuOp.JMP, CpuOp.JSR  => self.currCycle >= 2,
+                return switch (self.currInst.op) {
+                    CpuOp.JMP, CpuOp.JSR => self.currCycle >= 2,
                     else => self.currCycle == 3,
                 };
             },
@@ -398,7 +375,7 @@ pub const Cpu6502 = struct {
         self.shouldFetch = false;
         self.cyclesLeft += 1;
     }
-    
+
     fn doSubtract(self: *Cpu6502, minuend: u8) SubResult {
         return subtract(minuend, @truncate(self.workingVal), self.getFlag(.Carry));
     }
@@ -408,11 +385,10 @@ pub const Cpu6502 = struct {
     }
 
     pub fn setFlag(self: *Cpu6502, flag: CpuFlags, val: bool) void {
-        const b : u8 = @intFromEnum(flag);
-        if(val) {
+        const b: u8 = @intFromEnum(flag);
+        if (val) {
             self.status |= b;
-        }
-        else {
+        } else {
             self.status &= ~b;
         }
     }
@@ -426,7 +402,7 @@ pub const Cpu6502 = struct {
     }
 
     fn handleInstExec(self: *Cpu6502) void {
-        switch(self.currInst.op) {
+        switch (self.currInst.op) {
             .ADC => {
                 const result: u16 = @as(u16, self.a) +% self.workingVal + @intFromBool(self.getFlag(.Carry));
                 self.a = @truncate(result);
@@ -445,17 +421,17 @@ pub const Cpu6502 = struct {
                 self.checkNegativeFlag(@truncate(self.workingVal));
             },
             .BCC => {
-                if(!self.getFlag(.Carry)) {
+                if (!self.getFlag(.Carry)) {
                     self.takeBranch();
                 }
             },
             .BCS => {
-                if(self.getFlag(.Carry)) {
+                if (self.getFlag(.Carry)) {
                     self.takeBranch();
                 }
             },
             .BEQ => {
-                if(self.getFlag(.Zero)) {
+                if (self.getFlag(.Zero)) {
                     self.takeBranch();
                 }
             },
@@ -467,28 +443,28 @@ pub const Cpu6502 = struct {
                 self.setFlag(.Overflow, (self.workingVal & 0x40) != 0);
             },
             .BMI => {
-                if(self.getFlag(.Negative)) {
+                if (self.getFlag(.Negative)) {
                     self.takeBranch();
                 }
             },
             .BNE => {
-                if(!self.getFlag(.Zero)) {
+                if (!self.getFlag(.Zero)) {
                     self.takeBranch();
                 }
             },
             .BPL => {
-                if(!self.getFlag(.Negative)) {
+                if (!self.getFlag(.Negative)) {
                     self.takeBranch();
                 }
             },
             // .BRK => {},
             .BVC => {
-                if(!self.getFlag(.Overflow)) {
+                if (!self.getFlag(.Overflow)) {
                     self.takeBranch();
                 }
             },
             .BVS => {
-                if(self.getFlag(.Overflow)) {
+                if (self.getFlag(.Overflow)) {
                     self.takeBranch();
                 }
             },
@@ -523,7 +499,7 @@ pub const Cpu6502 = struct {
                 self.checkNegativeFlag(result.val);
             },
             .DEC => {
-                const wv : u8 = @truncate(self.workingVal);
+                const wv: u8 = @truncate(self.workingVal);
                 self.workingVal = @intCast(wv -% 1);
                 self.checkZeroFlag(@truncate(self.workingVal));
                 self.checkNegativeFlag(@truncate(self.workingVal));
@@ -544,7 +520,7 @@ pub const Cpu6502 = struct {
                 self.checkNegativeFlag(self.a);
             },
             .INC => {
-                const wv : u8 = @truncate(self.workingVal);
+                const wv: u8 = @truncate(self.workingVal);
                 self.workingVal = @intCast(wv +% 1);
                 self.checkZeroFlag(@truncate(self.workingVal));
                 self.checkNegativeFlag(@truncate(self.workingVal));
@@ -569,28 +545,25 @@ pub const Cpu6502 = struct {
                 // Don't use the normal fetch logic, setup the address bus directly.
                 self.shouldFetch = false;
 
-                if(self.currCycle == 2) {
+                if (self.currCycle == 2) {
                     // Push the status register on to the stack
                     self.addrBus = StackBase + self.sp;
                     self.dataBus = self.status;
                     self.busState = .Write;
                     self.sp = self.sp +% 1;
-                }
-                else if(self.currCycle == 3) {
+                } else if (self.currCycle == 3) {
                     // Push the low byte of the PC to the stack
                     self.addrBus = StackBase + self.sp;
                     self.dataBus = @as(u8, @truncate(self.pc));
                     self.busState = .Write;
                     self.sp = self.sp +% 1;
-                }
-                else if(self.currCycle == 4) {
+                } else if (self.currCycle == 4) {
                     // Push the high byte of the PC.
                     self.addrBus = StackBase + self.sp;
                     self.dataBus = @as(u8, @truncate(self.pc >> 8));
                     self.busState = .Write;
                     self.sp = self.sp +% 1;
-                }
-                else if(self.currCycle == 5) {
+                } else if (self.currCycle == 5) {
                     // Jump to the address we read as part of the instruction.
                     self.addrBus = self.internalAddr;
                     self.pc = self.internalAddr +% 1;
@@ -625,48 +598,42 @@ pub const Cpu6502 = struct {
                 self.checkNegativeFlag(self.a);
             },
             .PHA => {
-                if(self.currCycle == 0) {
+                if (self.currCycle == 0) {
                     self.addrBus = StackBase +% @as(u16, self.sp);
                     self.dataBus = self.a;
                     self.busState = ReadWriteState.Write;
-                }
-                else if(self.currCycle == 1) {
+                } else if (self.currCycle == 1) {
                     self.sp = self.sp +% 1;
                 }
             },
             .PHP => {
-                if(self.currCycle == 0) {
+                if (self.currCycle == 0) {
                     self.addrBus = StackBase +% @as(u16, self.sp);
                     self.dataBus = self.status;
                     self.busState = ReadWriteState.Write;
-                }
-                else if(self.currCycle == 1) {
+                } else if (self.currCycle == 1) {
                     self.sp = self.sp +% 1;
                 }
             },
             .PLA => {
-                if(self.currCycle == 0) {
+                if (self.currCycle == 0) {
                     self.sp = self.sp -% 1;
-                }
-                else if(self.currCycle == 1) {
+                } else if (self.currCycle == 1) {
                     self.addrBus = StackBase +% @as(u16, self.sp);
                     self.busState = ReadWriteState.Read;
-                }
-                else if(self.currCycle == 2) {
+                } else if (self.currCycle == 2) {
                     self.a = self.dataBus;
                     self.checkZeroFlag(self.a);
                     self.checkNegativeFlag(self.a);
                 }
             },
             .PLP => {
-                if(self.currCycle == 0) {
+                if (self.currCycle == 0) {
                     self.sp = self.sp -% 1;
-                }
-                else if(self.currCycle == 1) {
+                } else if (self.currCycle == 1) {
                     self.addrBus = StackBase +% @as(u16, self.sp);
                     self.busState = ReadWriteState.Read;
-                }
-                else if(self.currCycle == 2) {
+                } else if (self.currCycle == 2) {
                     self.status = self.dataBus;
                 }
             },
@@ -688,27 +655,23 @@ pub const Cpu6502 = struct {
             .RTS => {
                 self.shouldFetch = false;
 
-                if(self.currCycle == 1) {
+                if (self.currCycle == 1) {
                     self.sp = self.sp -% 1;
-                }
-                else if(self.currCycle == 2) {
+                } else if (self.currCycle == 2) {
                     self.addrBus = StackBase + self.sp;
                     self.busState = .Read;
                     self.sp = self.sp -% 1;
-                }
-                else if(self.currCycle == 3) {
+                } else if (self.currCycle == 3) {
                     self.workingVal = @as(u16, self.dataBus) << 8;
                     self.addrBus = StackBase + self.sp;
                     self.busState = .Read;
                     self.sp = self.sp -% 1;
-                }
-                else if(self.currCycle == 4) {
+                } else if (self.currCycle == 4) {
                     self.workingVal = self.workingVal | @as(u16, self.dataBus);
                     self.addrBus = StackBase + self.sp;
                     self.busState = .Read;
                     // self.sp = self.sp -% 1;
-                }
-                else if(self.currCycle == 5) {
+                } else if (self.currCycle == 5) {
                     self.status = self.dataBus;
 
                     self.addrBus = self.workingVal;
@@ -768,8 +731,7 @@ pub const Cpu6502 = struct {
             },
             else => {
                 @panic("Unhandled instruction!");
-            }
+            },
         }
     }
 };
-

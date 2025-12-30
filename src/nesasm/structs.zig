@@ -1,24 +1,20 @@
-// zig fmt: off
 const std = @import("std");
 const nes = @import("nesterz");
 
 const CpuOp = nes.CpuOp;
 const AddressMode = nes.AddressMode;
-pub const Operand = union(enum) { 
-    byte: u8, 
-    word: u16 
+pub const Operand = union(enum) {
+    byte: u8,
+    word: u16,
 };
 
 pub const Instruction = struct {
     op: CpuOp,
     addrMode: AddressMode,
-    operand: ?Operand
+    operand: ?Operand,
 };
 
-pub const InstructionBytes = struct {
-    data: [3]u8,
-    len: u8
-};
+pub const InstructionBytes = struct { data: [3]u8, len: u8 };
 
 pub const Label = struct {
     name: []const u8,
@@ -29,7 +25,7 @@ pub const Label = struct {
         return .{
             .name = alloc.dupe(name),
             .line = line,
-            .byteLoc = loc
+            .byteLoc = loc,
         };
     }
 
@@ -42,13 +38,13 @@ pub const AssemblyLine = struct {
     instr: ?Instruction,
     label: ?Label,
     comment: ?[]const u8,
-    lineNo: usize
+    lineNo: usize,
 };
 
 pub const AssemblyError = struct {
     err: AssemblyParseError,
     lineNo: usize,
-    line: []const u8
+    line: []const u8,
 };
 
 pub const AssemblyParseError = union(enum) {
@@ -63,4 +59,3 @@ pub const AssemblyParseError = union(enum) {
     UnknownDirective: []const u8,
     MissingDirectiveValue,
 };
-

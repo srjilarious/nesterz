@@ -1,41 +1,38 @@
-// zig fmt: off
 const std = @import("std");
 
-pub const AddressMode = enum { 
-    Implied, 
-    Accumulator, 
-    Immediate, 
-    ZeroPage, 
-    ZeroPageX, 
-    ZeroPageY, 
-    Relative, 
-    Absolute, 
-    AbsoluteX, 
-    AbsoluteY, 
-    Indirect, 
-    IndirectX, 
-    IndirectY 
+pub const AddressMode = enum {
+    Implied,
+    Accumulator,
+    Immediate,
+    ZeroPage,
+    ZeroPageX,
+    ZeroPageY,
+    Relative,
+    Absolute,
+    AbsoluteX,
+    AbsoluteY,
+    Indirect,
+    IndirectX,
+    IndirectY,
 };
 
 pub const CpuFlags = enum(u8) {
     Empty = 0,
-    Carry  = 0x1,
+    Carry = 0x1,
     Zero = 0x2,
     InterruptsDisabled = 0x4,
     DecimalMode = 0x8,
     Break = 0x10,
     Overflow = 0x20,
     Negative = 0x80,
-    All = 0xff
+    All = 0xff,
 };
-
 
 pub const Cpu6502State = enum {
     Startup,
     Normal,
     Halted,
 };
-
 
 pub const CpuOp = enum {
     UNKNOWN,
@@ -123,8 +120,8 @@ pub const CpuOp = enum {
 };
 
 pub fn cpuOpFromStr(opStr: []const u8) ?CpuOp {
-    inline for(std.meta.fields(CpuOp)) |f| {
-        if(std.ascii.eqlIgnoreCase(opStr, f.name)) {
+    inline for (std.meta.fields(CpuOp)) |f| {
+        if (std.ascii.eqlIgnoreCase(opStr, f.name)) {
             return @as(CpuOp, @enumFromInt(f.value));
         }
     }
@@ -210,15 +207,9 @@ pub fn storesBackValue(op: CpuOp) bool {
     };
 }
 
-pub const ReadWriteState = enum { 
-    HighImpedance, 
-    Write, 
-    Read 
-};
+pub const ReadWriteState = enum { HighImpedance, Write, Read };
 
-pub const EmuError = error {
-    UnknownOp
-};
+pub const EmuError = error{UnknownOp};
 
 pub const Instruction6502 = struct {
     opCode: u8,
@@ -509,8 +500,3 @@ pub const Instruction6502 = struct {
         };
     }
 };
-
-
-
-
-
