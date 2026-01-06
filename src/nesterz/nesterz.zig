@@ -2,6 +2,7 @@ const std = @import("std");
 
 pub const emu = @import("./emu.zig");
 pub const cpu = @import("./cpu.zig");
+pub const catridge = @import("./cartridge.zig");
 
 pub const CpuState = emu.Cpu6502State;
 pub const Instruction = emu.Instruction6502;
