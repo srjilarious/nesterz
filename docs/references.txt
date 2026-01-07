@@ -1,0 +1,2 @@
+Useful set of test roms:
+https://github.com/christopherpow/nes-test-roms/tree/master
