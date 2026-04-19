@@ -68,7 +68,7 @@ pub const Scanner = struct {
         return .{
             .source = source,
             .alloc = alloc,
-            .tokens = .{},
+            .tokens = .empty,
             .start = 0,
             .curr = 0,
             .line = 0,

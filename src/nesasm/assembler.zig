@@ -42,9 +42,9 @@ pub const Assembler6502 = struct {
         return .{
             .alloc = alloc,
             .source = source,
-            .labels = .{},
+            .labels = .empty,
             .symbols = std.StringHashMap(Operand).init(alloc),
-            .lines = .{},
+            .lines = .empty,
             .currLineNo = 0,
             .currByteOffset = 0,
             .scanner = scan,
@@ -244,8 +244,8 @@ pub const Assembler6502 = struct {
 
                             // Make sure the operand is a byte value.
                             switch (operand) {
-                                .byte => |_| {},
-                                .word => |_| {
+                                .byte => {},
+                                .word => {
                                     // Operand too big for Indirect X.
                                     return error.OperandTooBig;
                                 },
@@ -282,8 +282,8 @@ pub const Assembler6502 = struct {
 
                         // Make sure the operand is a byte value.
                         switch (operand) {
-                            .byte => |_| {},
-                            .word => |_| {
+                            .byte => {},
+                            .word => {
                                 // Operand too big for Indirect X.
                                 return error.OperandTooBig;
                             },

@@ -36,6 +36,6 @@ const Tests = testz.discoverTests(.{
     testz.Group{ .name = "Cartridge Tests", .tag = "cartridge", .mod = @import("nesterz/tests/cartridge_tests.zig") },
 }, .{});
 
-pub fn main() !void {
-    try testz.testzRunner(Tests);
+pub fn main(init: std.process.Init) !void {
+    try testz.testzRunner(Tests, init.minimal.args);
 }

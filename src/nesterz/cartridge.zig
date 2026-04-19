@@ -37,7 +37,7 @@ pub const Rom = struct {
     mapper: u8,
     screenMirroring: ScreenMirroring,
 
-    pub fn init(bytes: *std.io.Reader, alloc: std.mem.Allocator) !Rom {
+    pub fn init(bytes: *std.Io.Reader, alloc: std.mem.Allocator) !Rom {
         const header = try bytes.takeStruct(INesHeader, .little);
         if (header.magic != NES_MAGIC) {
             return error.InvalidCartridge;
