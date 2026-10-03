@@ -10,16 +10,16 @@ pub const CpuFlags = emu.CpuFlags;
 
 const StackBase: u16 = 0x100;
 
-const SubResult = struct {
+const AddResult = struct {
     val: u8,
     carry: bool,
     overflow: bool,
 };
 
-fn subtract(minuend: u8, subtrahend: u8, carry: bool) SubResult {
-    const res: u16 = minuend +% ~subtrahend +% @intFromBool(carry);
-    const val: u8 = @intCast(res);
-    const overflow = (minuend ^ val) & (subtrahend ^ val) & 0x80 != 0;
+fn add(a: u8, m: u8, carry: bool) AddResult {
+    const res: u16 = @as(u16, a) +% @as(u16, m) +% @intFromBool(carry);
+    const val: u8 = @truncate(res);
+    const overflow = ((a ^ val) & (m ^ val) & 0x80) != 0;
     return .{
         .val = val,
         .carry = (res & 0x100) != 0,
@@ -376,8 +376,8 @@ pub const Cpu6502 = struct {
         self.cyclesLeft += 1;
     }
 
-    fn doSubtract(self: *Cpu6502, minuend: u8) SubResult {
-        return subtract(minuend, @truncate(self.workingVal), self.getFlag(.Carry));
+    fn doSubtract(self: *Cpu6502, minuend: u8) AddResult {
+        return add(minuend, ~@as(u8, @truncate(self.workingVal)), self.getFlag(.Carry));
     }
 
     pub fn getFlag(self: *Cpu6502, flag: CpuFlags) bool {
@@ -404,8 +404,10 @@ pub const Cpu6502 = struct {
     fn handleInstExec(self: *Cpu6502) void {
         switch (self.currInst.op) {
             .ADC => {
-                const result: u16 = @as(u16, self.a) +% self.workingVal + @intFromBool(self.getFlag(.Carry));
-                self.a = @truncate(result);
+                const addResult = add(self.a, @truncate(self.workingVal), self.getFlag(.Carry));
+                self.a = addResult.val;
+                self.setFlag(.Carry, addResult.carry);
+                self.setFlag(.Overflow, addResult.overflow);
                 self.checkZeroFlag(self.a);
                 self.checkNegativeFlag(self.a);
             },
@@ -470,6 +472,9 @@ pub const Cpu6502 = struct {
             },
             .CLC => {
                 self.setFlag(.Carry, false);
+            },
+            .CLD => {
+                self.setFlag(.Decimal, false);
             },
             .CLI => {
                 self.setFlag(.InterruptsDisabled, false);
@@ -680,7 +685,7 @@ pub const Cpu6502 = struct {
                 }
             },
             .SBC => {
-                const subResult = subtract(self.a, @truncate(self.workingVal), self.getFlag(.Carry));
+                const subResult = add(self.a, ~@as(u8, @truncate(self.workingVal)), self.getFlag(.Carry));
                 self.a = subResult.val;
                 self.setFlag(.Carry, subResult.carry);
                 self.setFlag(.Overflow, subResult.overflow);
@@ -689,6 +694,9 @@ pub const Cpu6502 = struct {
             },
             .SEC => {
                 self.setFlag(.Carry, true);
+            },
+            .SED => {
+                self.setFlag(.Decimal, true);
             },
             .SEI => {
                 self.setFlag(.InterruptsDisabled, true);

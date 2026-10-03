@@ -21,7 +21,7 @@ pub const CpuFlags = enum(u8) {
     Carry = 0x1,
     Zero = 0x2,
     InterruptsDisabled = 0x4,
-    DecimalMode = 0x8,
+    Decimal = 0x8,
     Break = 0x10,
     Overflow = 0x40,
     Negative = 0x80,
@@ -286,7 +286,7 @@ pub const Instruction6502 = struct {
             0x18 => Instruction6502.init(opCode, .CLC, .Implied, 1, 2),
 
             // CLD - Clear Decimal Flag
-            //0xD8 => Instruction6502.init(opCode, .CLD, .Implied, 1, 2),
+            0xD8 => Instruction6502.init(opCode, .CLD, .Implied, 1, 2),
 
             // CLI - Clear Carry Flag
             0x58 => Instruction6502.init(opCode, .CLI, .Implied, 1, 2),
@@ -453,7 +453,7 @@ pub const Instruction6502 = struct {
             0x38 => Instruction6502.init(opCode, .SEC, .Implied, 1, 2),
 
             // SED - Decimal Flag
-            //0x18 => Instruction6502.init(opCode, .SED, .Implied, 1, 2),
+            0xF8 => Instruction6502.init(opCode, .SED, .Implied, 1, 2),
 
             // SEI - Set Interrupt Flag
             0x78 => Instruction6502.init(opCode, .SEI, .Implied, 1, 2),
