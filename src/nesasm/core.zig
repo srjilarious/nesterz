@@ -17,10 +17,10 @@ const AssemblyParseError = structs.AssemblyParseError;
 
 const AddrOp = struct { addr: AddressMode, operand: ?Operand };
 
-const NumCpuOps = @typeInfo(CpuOp).@"enum".fields.len;
-const NumAddressModes = @typeInfo(AddressMode).@"enum".fields.len;
+const NumCpuOps = @typeInfo(CpuOp).@"enum".field_names.len;
+const NumAddressModes = @typeInfo(AddressMode).@"enum".field_names.len;
 pub fn createOpCodeTable() [NumCpuOps][NumAddressModes]?Instruction6502 {
-    var opCodeTable: [NumCpuOps][NumAddressModes]?Instruction6502 = [_][NumAddressModes]?Instruction6502{[_]?Instruction6502{null} ** NumAddressModes} ** NumCpuOps;
+    var opCodeTable: [NumCpuOps][NumAddressModes]?Instruction6502 = @splat(@splat(null));
 
     for (0..0xff) |val| {
         if (Instruction6502.fromOpCode(val)) |inst| {

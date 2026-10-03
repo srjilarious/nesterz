@@ -9,7 +9,7 @@ const Operand = nasm.Operand;
 
 fn checkCodeGen(op: CpuOp, addr: AddressMode, operand: ?Operand, expected: []const u8) !void {
     // Buffer for storing generated instruction.
-    var buff: [4]u8 = .{0} ** 4;
+    var buff: [4]u8 = @splat(0);
     const result = nasm.codeGen(op, .{ .addr = addr, .operand = operand }, &buff);
     try testz.expectEqualStr(result.?, expected);
 }

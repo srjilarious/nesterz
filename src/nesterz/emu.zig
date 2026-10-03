@@ -120,9 +120,9 @@ pub const CpuOp = enum {
 };
 
 pub fn cpuOpFromStr(opStr: []const u8) ?CpuOp {
-    inline for (std.meta.fields(CpuOp)) |f| {
-        if (std.ascii.eqlIgnoreCase(opStr, f.name)) {
-            return @as(CpuOp, @enumFromInt(f.value));
+    inline for (@typeInfo(CpuOp).@"enum".field_names) |name| {
+        if (std.ascii.eqlIgnoreCase(opStr, name)) {
+            return @field(CpuOp, name);
         }
     }
     return null;
