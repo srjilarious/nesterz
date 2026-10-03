@@ -72,7 +72,7 @@ pub fn jsrAbsoluteTest() !void {
     // JSR takes 6 instructions
     try testz.expectEqual(tn.tickInstruction(), 6);
 
-    try testz.expectEqual(tn.cpu.sp, 3);
+    try testz.expectEqual(tn.cpu.sp, 253);
 
     // Run the first INY
     try testz.expectEqual(tn.tickInstruction(), 2);

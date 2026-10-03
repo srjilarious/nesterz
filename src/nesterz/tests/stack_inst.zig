@@ -24,7 +24,7 @@ pub fn pushPullAccumulatorTest() !void {
     // First PHA, should push 0x45 to stack
     try testz.expectEqual(tn.tickInstruction(), 3);
     try testz.expectEqual(tn.readByte(0x100), 0x45);
-    try testz.expectEqual(tn.cpu.sp, 1);
+    try testz.expectEqual(tn.cpu.sp, 255);
 
     // Add 0x10 to accumulator
     try testz.expectEqual(tn.tickInstruction(), 2);
@@ -32,8 +32,8 @@ pub fn pushPullAccumulatorTest() !void {
 
     // Second PHA, should push 0x45 to stack
     try testz.expectEqual(tn.tickInstruction(), 3);
-    try testz.expectEqual(tn.readByte(0x101), 0x55);
-    try testz.expectEqual(tn.cpu.sp, 2);
+    try testz.expectEqual(tn.readByte(0x1FF), 0x55);
+    try testz.expectEqual(tn.cpu.sp, 254);
 
     // Add 0x10 to accumulator
     try testz.expectEqual(tn.tickInstruction(), 2);
@@ -42,7 +42,7 @@ pub fn pushPullAccumulatorTest() !void {
     // First PLA, should pull 0x55 from stack
     try testz.expectEqual(tn.tickInstruction(), 4);
     try testz.expectEqual(tn.cpu.a, 0x55);
-    try testz.expectEqual(tn.cpu.sp, 1);
+    try testz.expectEqual(tn.cpu.sp, 255);
 
     // Second PLA, should pull 0x45 from stack
     try testz.expectEqual(tn.tickInstruction(), 4);
@@ -64,7 +64,7 @@ pub fn pushPullProcStatusTest() !void {
 
     try testz.expectEqual(tn.tickInstruction(), 3);
     try testz.expectEqual(tn.readByte(0x100), 0xff);
-    try testz.expectEqual(tn.cpu.sp, 1);
+    try testz.expectEqual(tn.cpu.sp, 0xff);
 
     tn.cpu.status = 0x27;
 

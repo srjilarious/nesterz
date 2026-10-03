@@ -550,19 +550,19 @@ pub const Cpu6502 = struct {
                     self.addrBus = StackBase + self.sp;
                     self.dataBus = self.status;
                     self.busState = .Write;
-                    self.sp = self.sp +% 1;
+                    self.sp = self.sp -% 1;
                 } else if (self.currCycle == 3) {
                     // Push the low byte of the PC to the stack
                     self.addrBus = StackBase + self.sp;
                     self.dataBus = @as(u8, @truncate(self.pc));
                     self.busState = .Write;
-                    self.sp = self.sp +% 1;
+                    self.sp = self.sp -% 1;
                 } else if (self.currCycle == 4) {
                     // Push the high byte of the PC.
                     self.addrBus = StackBase + self.sp;
                     self.dataBus = @as(u8, @truncate(self.pc >> 8));
                     self.busState = .Write;
-                    self.sp = self.sp +% 1;
+                    self.sp = self.sp -% 1;
                 } else if (self.currCycle == 5) {
                     // Jump to the address we read as part of the instruction.
                     self.addrBus = self.internalAddr;
@@ -603,7 +603,7 @@ pub const Cpu6502 = struct {
                     self.dataBus = self.a;
                     self.busState = ReadWriteState.Write;
                 } else if (self.currCycle == 1) {
-                    self.sp = self.sp +% 1;
+                    self.sp = self.sp -% 1;
                 }
             },
             .PHP => {
@@ -612,12 +612,12 @@ pub const Cpu6502 = struct {
                     self.dataBus = self.status;
                     self.busState = ReadWriteState.Write;
                 } else if (self.currCycle == 1) {
-                    self.sp = self.sp +% 1;
+                    self.sp = self.sp -% 1;
                 }
             },
             .PLA => {
                 if (self.currCycle == 0) {
-                    self.sp = self.sp -% 1;
+                    self.sp = self.sp +% 1;
                 } else if (self.currCycle == 1) {
                     self.addrBus = StackBase +% @as(u16, self.sp);
                     self.busState = ReadWriteState.Read;
@@ -629,7 +629,7 @@ pub const Cpu6502 = struct {
             },
             .PLP => {
                 if (self.currCycle == 0) {
-                    self.sp = self.sp -% 1;
+                    self.sp = self.sp +% 1;
                 } else if (self.currCycle == 1) {
                     self.addrBus = StackBase +% @as(u16, self.sp);
                     self.busState = ReadWriteState.Read;
@@ -656,21 +656,21 @@ pub const Cpu6502 = struct {
                 self.shouldFetch = false;
 
                 if (self.currCycle == 1) {
-                    self.sp = self.sp -% 1;
+                    self.sp = self.sp +% 1;
                 } else if (self.currCycle == 2) {
                     self.addrBus = StackBase + self.sp;
                     self.busState = .Read;
-                    self.sp = self.sp -% 1;
+                    self.sp = self.sp +% 1;
                 } else if (self.currCycle == 3) {
                     self.workingVal = @as(u16, self.dataBus) << 8;
                     self.addrBus = StackBase + self.sp;
                     self.busState = .Read;
-                    self.sp = self.sp -% 1;
+                    self.sp = self.sp +% 1;
                 } else if (self.currCycle == 4) {
                     self.workingVal = self.workingVal | @as(u16, self.dataBus);
                     self.addrBus = StackBase + self.sp;
                     self.busState = .Read;
-                    // self.sp = self.sp -% 1;
+                    // self.sp = self.sp +% 1;
                 } else if (self.currCycle == 5) {
                     self.status = self.dataBus;
 
@@ -713,21 +713,31 @@ pub const Cpu6502 = struct {
             },
             .TAX => {
                 self.x = self.a;
+                self.checkZeroFlag(self.x);
+                self.checkNegativeFlag(self.x);
             },
             .TAY => {
                 self.y = self.a;
+                self.checkZeroFlag(self.y);
+                self.checkNegativeFlag(self.y);
             },
             .TSX => {
                 self.x = self.sp;
+                self.checkZeroFlag(self.x);
+                self.checkNegativeFlag(self.x);
             },
             .TXA => {
                 self.a = self.x;
+                self.checkZeroFlag(self.a);
+                self.checkNegativeFlag(self.a);
             },
             .TXS => {
                 self.sp = self.x;
             },
             .TYA => {
                 self.a = self.y;
+                self.checkZeroFlag(self.a);
+                self.checkNegativeFlag(self.a);
             },
             else => {
                 @panic("Unhandled instruction!");

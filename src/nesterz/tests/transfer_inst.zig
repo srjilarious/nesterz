@@ -16,21 +16,30 @@ pub fn transferXTest() !void {
 
     tn.cpu.a = 0x10;
     try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectFalse(tn.cpu.getFlag(.Zero));
+    try testz.expectFalse(tn.cpu.getFlag(.Negative));
     try testz.expectEqual(tn.cpu.a, 0x10);
     try testz.expectEqual(tn.cpu.x, 0x10);
 
     tn.cpu.x = 0x50;
     try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectFalse(tn.cpu.getFlag(.Zero));
+    try testz.expectFalse(tn.cpu.getFlag(.Negative));
     try testz.expectEqual(tn.cpu.a, 0x50);
     try testz.expectEqual(tn.cpu.x, 0x50);
 
     tn.cpu.a = 0xff;
     try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectFalse(tn.cpu.getFlag(.Zero));
+    try testz.expectTrue(tn.cpu.getFlag(.Negative));
     try testz.expectEqual(tn.cpu.a, 0xff);
     try testz.expectEqual(tn.cpu.x, 0xff);
 
     tn.cpu.x = 0x0;
     try testz.expectEqual(tn.tickInstruction(), 2);
+    try testz.expectTrue(tn.cpu.getFlag(.Zero));
+    try testz.expectFalse(tn.cpu.getFlag(.Negative));
+
     try testz.expectEqual(tn.cpu.a, 0x0);
     try testz.expectEqual(tn.cpu.x, 0x0);
 }

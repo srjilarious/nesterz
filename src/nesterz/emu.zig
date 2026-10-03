@@ -23,7 +23,7 @@ pub const CpuFlags = enum(u8) {
     InterruptsDisabled = 0x4,
     DecimalMode = 0x8,
     Break = 0x10,
-    Overflow = 0x20,
+    Overflow = 0x40,
     Negative = 0x80,
     All = 0xff,
 };
